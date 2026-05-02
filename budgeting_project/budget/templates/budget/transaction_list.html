@@ -48,12 +48,12 @@
                     </td>
                     <td>{{ t.category }}</td>
                     <td>{{ t.payment_method }}</td>
-                    <td style="color:#666; font-size:0.875rem;">{{ t.notes|default:"—" }}</td>
+                    <td style="color:#a8b3d6; font-size:0.875rem;">{{ t.notes|default:"—" }}</td>
                     <td style="text-align:right; font-weight:600;">
                         {% if t.transaction_type == 'expense' %}
-                            <span style="color:#E74C3C;">- {{ t.amount|floatformat:2 }}</span>
+                            <span style="color:#ff4fd8;">- {{ t.amount|floatformat:2 }}</span>
                         {% else %}
-                            <span style="color:#27AE60;">+ {{ t.amount|floatformat:2 }}</span>
+                            <span style="color:#00f5d4;">+ {{ t.amount|floatformat:2 }}</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -64,7 +64,7 @@
         {% else %}
         <!-- No transactions yet -->
         <div class="empty-state">
-            <div style="font-size:2rem; color:#ccc;">—</div>
+            <div style="font-size:2rem; color:#6f7da8;">—</div>
             <h3>No transactions yet</h3>
             <p>Click the button above to record your first transaction.</p>
             <a href="{% url 'add_transaction' %}" class="btn btn-primary">+ Add Transaction</a>

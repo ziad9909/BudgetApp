@@ -27,7 +27,7 @@
         {% if budget_statuses %}
 
             {% for item in budget_statuses %}
-            <div style="margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #f0f0f0;">
+            <div style="margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #2a3458;">
 
                 <!-- Category name + status badge -->
                 <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
@@ -56,7 +56,7 @@
                 </div>
 
                 <!-- Numbers: spent, percentage, limit -->
-                <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:#666;">
+                <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:#a8b3d6;">
                     <span>Spent: {{ item.budget.spent_amount }} EGP</span>
                     <span>{{ item.percentage }}%</span>
                     <span>Limit: {{ item.budget.limit_amount }} EGP</span>

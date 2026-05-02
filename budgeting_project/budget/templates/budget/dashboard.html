@@ -13,8 +13,8 @@
 
 <div class="page-header">
     <div>
-        <h2>Welcome, {{ user.username }}!</h2>
-        <p>User Story #7 – Dashboard Overview</p>
+        <h2>Dashboard</h2>
+        <p>Your financial overview at a glance</p>
     </div>
     <a href="{% url 'add_transaction' %}" class="btn btn-primary">+ Add Transaction</a>
 </div>
@@ -33,17 +33,32 @@
 <!-- Stat Cards -->
 <div class="stat-row">
     <div class="stat-card">
+        <div class="stat-icon-wrap icon-cyan">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+        </div>
         <div class="stat-label">Total Balance</div>
-        <div class="stat-value {% if total_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+        <div class="stat-value text-cyan">
             {{ total_balance }} EGP
         </div>
     </div>
-    <div class="stat-card income">
-        <div class="stat-label">Income This Month</div>
+    <div class="stat-card">
+        <div class="stat-icon-wrap icon-income">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+            </svg>
+        </div>
+        <div class="stat-label">Monthly Income</div>
         <div class="stat-value text-success">{{ monthly_income }} EGP</div>
     </div>
-    <div class="stat-card expense">
-        <div class="stat-label">Expenses This Month</div>
+    <div class="stat-card">
+        <div class="stat-icon-wrap icon-expense">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>
+            </svg>
+        </div>
+        <div class="stat-label">Monthly Expenses</div>
         <div class="stat-value text-danger">{{ monthly_expenses }} EGP</div>
     </div>
 </div>
@@ -57,7 +72,7 @@
         <div class="card">
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
                 <span>Recent Transactions</span>
-                <a href="{% url 'transaction_list' %}" class="btn btn-sm btn-outline" style="color:#fff; border-color:#fff;">View All</a>
+                <a href="{% url 'transaction_list' %}" class="btn btn-sm btn-outline">View All</a>
             </div>
             <div class="card-body" style="padding:0;">
                 {% if recent_transactions %}
@@ -89,7 +104,7 @@
         <div class="card">
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
                 <span>Active Budgets</span>
-                <a href="{% url 'budget_list' %}" class="btn btn-sm btn-outline" style="color:#fff; border-color:#fff;">View All</a>
+                <a href="{% url 'budget_list' %}" class="btn btn-sm btn-outline">View All</a>
             </div>
             <div class="card-body">
                 {% if active_budgets %}
@@ -111,7 +126,7 @@
                     {% endfor %}
                 {% else %}
                 <div class="empty-state">
-                    <p>No active budgets. <a href="{% url 'create_budget' %}" style="color:#2E74B5;">Create one</a>.</p>
+                    <p>No active budgets. <a href="{% url 'create_budget' %}" style="color:#67e8f9;">Create one</a>.</p>
                 </div>
                 {% endif %}
             </div>
@@ -124,7 +139,7 @@
         <div class="card">
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
                 <span>My Goals</span>
-                <a href="{% url 'goals' %}" class="btn btn-sm btn-outline" style="color:#fff; border-color:#fff;">View All</a>
+                <a href="{% url 'goals' %}" class="btn btn-sm btn-outline">View All</a>
             </div>
             <div class="card-body">
                 {% if goals %}
@@ -142,7 +157,7 @@
                     {% endfor %}
                 {% else %}
                 <div class="empty-state">
-                    <p>No goals. <a href="{% url 'goals' %}" style="color:#2E74B5;">Set a goal</a>.</p>
+                    <p>No goals. <a href="{% url 'goals' %}" style="color:#67e8f9;">Set a goal</a>.</p>
                 </div>
                 {% endif %}
             </div>
@@ -152,7 +167,7 @@
         <div class="card">
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
                 <span>Notifications {% if notifications %}<span class="badge badge-danger">{{ notifications.count }}</span>{% endif %}</span>
-                <a href="{% url 'alerts' %}" class="btn btn-sm btn-outline" style="color:#fff; border-color:#fff;">View All</a>
+                <a href="{% url 'alerts' %}" class="btn btn-sm btn-outline">View All</a>
             </div>
             <div class="card-body" style="padding:0;">
                 {% if notifications %}
@@ -179,3 +194,5 @@
     <span class="text-muted">Acceptance: calculateTotalBalance(), calculateMonthlyIncome(), calculateMonthlyExpenses() run on load. Placeholders shown when no data exists.</span>
 </div>
 {% endblock %}
+
+
