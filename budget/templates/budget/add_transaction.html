@@ -1,0 +1,143 @@
+{% extends 'budget/base.html' %}
+{% block title %}Add Transaction – BudgetApp{% endblock %}
+
+{% block content %}
+<!--
+    ===============================================================
+    User Story #2 – Add Transaction
+    Developed by: ملك
+    Description : A logged-in user records an income or expense
+                  (type, amount, category, date, payment, notes).
+    ===============================================================
+-->
+
+<div class="page-header">
+    <div>
+        <h2>Add Transaction</h2>
+        <p>User Story #2 – Record a new income or expense</p>
+    </div>
+    <a href="{% url 'transaction_list' %}" class="btn btn-outline">View All</a>
+</div>
+
+<div style="max-width:640px; margin:0 auto;">
+    <div class="card">
+        <div class="card-header">Transaction Details</div>
+        <div class="card-body">
+
+            <form method="POST" action="{% url 'add_transaction' %}">
+                {% csrf_token %}
+
+                <div class="form-row">
+
+                    <!-- Transaction Type -->
+                    <div class="form-group">
+                        <label for="transaction_type">Type</label>
+                        <select id="transaction_type" name="transaction_type" class="form-control">
+                            <option value="expense" {% if old.transaction_type == 'expense' %}selected{% endif %}>
+                                Expense
+                            </option>
+                            <option value="income" {% if old.transaction_type == 'income' %}selected{% endif %}>
+                                Income
+                            </option>
+                        </select>
+                        {% if errors.transaction_type %}
+                            <div class="form-error">{{ errors.transaction_type }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="form-group">
+                        <label for="amount">Amount (EGP)</label>
+                        <input
+                            type="number"
+                            id="amount"
+                            name="amount"
+                            class="form-control"
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0.01"
+                            value="{{ old.amount }}"
+                        >
+                        {% if errors.amount %}
+                            <div class="form-error">{{ errors.amount }}</div>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+
+                    <!-- Category -->
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <input
+                            type="text"
+                            id="category"
+                            name="category"
+                            class="form-control"
+                            placeholder="e.g. Food, Transport"
+                            value="{{ old.category }}"
+                        >
+                        {% if errors.category %}
+                            <div class="form-error">{{ errors.category }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Date -->
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <input
+                            type="date"
+                            id="date"
+                            name="date"
+                            class="form-control"
+                            value="{{ old.date }}"
+                        >
+                        {% if errors.date %}
+                            <div class="form-error">{{ errors.date }}</div>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <!-- Payment Method -->
+                <div class="form-group">
+                    <label for="payment_method">Payment Method</label>
+                    <select id="payment_method" name="payment_method" class="form-control">
+                        <option value="cash"   {% if old.payment_method == 'cash'   %}selected{% endif %}>Cash</option>
+                        <option value="card"   {% if old.payment_method == 'card'   %}selected{% endif %}>Card</option>
+                        <option value="online" {% if old.payment_method == 'online' %}selected{% endif %}>Online</option>
+                    </select>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group">
+                    <label for="notes">Notes (optional)</label>
+                    <textarea
+                        id="notes"
+                        name="notes"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Any extra details..."
+                    >{{ old.notes }}</textarea>
+                </div>
+
+                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                    <a href="{% url 'transaction_list' %}" class="btn btn-outline">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Transaction</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <div class="info-box">
+        <strong>User Story #2:</strong> As a logged-in user, I want to record a transaction
+        so the app tracks where my money goes.<br>
+        <span class="text-muted">
+            Acceptance: Amount &gt; 0. After saving, matching Budget is updated
+            and checkLimit() is called.
+        </span>
+    </div>
+</div>
+{% endblock %}

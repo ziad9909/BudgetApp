@@ -1,0 +1,108 @@
+{% extends 'budget/base.html' %}
+{% block title %}Alerts – BudgetApp{% endblock %}
+
+{% block content %}
+<!--
+    ===============================================================
+    User Story #4 – Budget Over-Limit Alerts
+    Developed by: زياد
+    Description : Shows warnings when the user is close to or has
+                  exceeded a spending limit. No form needed here —
+                  it is a read-only page.
+    ===============================================================
+-->
+
+<div class="page-header">
+    <div>
+        <h2>Alerts &amp; Notifications</h2>
+        <p>User Story #4 – Budget over-limit warnings</p>
+    </div>
+</div>
+
+<!-- Active budget status overview -->
+<div class="card" style="margin-bottom:28px;">
+    <div class="card-header">Active Budgets – Status</div>
+    <div class="card-body">
+
+        {% if budget_statuses %}
+
+            {% for item in budget_statuses %}
+            <div style="margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #f0f0f0;">
+
+                <!-- Category name + status badge -->
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <span style="font-weight:600;">{{ item.budget.category }}</span>
+                    {% if item.status == 'exceeded' %}
+                        <span class="badge badge-red">Exceeded</span>
+                    {% elif item.status == 'warning' %}
+                        <span class="badge badge-orange">Warning</span>
+                    {% else %}
+                        <span class="badge badge-green">OK</span>
+                    {% endif %}
+                </div>
+
+                <!-- Progress bar -->
+                <div class="progress-wrap" style="margin-bottom:6px;">
+                    {% if item.status == 'exceeded' %}
+                        <div class="progress-bar progress-red"
+                             data-width="{{ item.percentage }}"></div>
+                    {% elif item.status == 'warning' %}
+                        <div class="progress-bar progress-yellow"
+                             data-width="{{ item.percentage }}"></div>
+                    {% else %}
+                        <div class="progress-bar progress-green"
+                             data-width="{{ item.percentage }}"></div>
+                    {% endif %}
+                </div>
+
+                <!-- Numbers: spent, percentage, limit -->
+                <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:#666;">
+                    <span>Spent: {{ item.budget.spent_amount }} EGP</span>
+                    <span>{{ item.percentage }}%</span>
+                    <span>Limit: {{ item.budget.limit_amount }} EGP</span>
+                </div>
+
+            </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="empty-state">
+                <p>No active budgets right now. Create one first!</p>
+                <a href="{% url 'create_budget' %}" class="btn btn-primary">Create Budget</a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- Notification history -->
+<div class="card">
+    <div class="card-header">Notification History</div>
+    <div class="card-body">
+
+        {% if notifications %}
+            {% for n in notifications %}
+            <div class="alert {% if 'exceeded' in n.message|lower %}alert-danger{% else %}alert-warning{% endif %}"
+                 style="margin-bottom:10px;">
+                <strong>{{ n.notif_type }}</strong> – {{ n.message }}<br>
+                <small class="text-muted">{{ n.created_at|date:"d M Y, H:i" }}</small>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted" style="text-align:center; padding:20px;">
+                No notifications yet. They will appear here when you approach a budget limit.
+            </p>
+        {% endif %}
+
+    </div>
+</div>
+
+<div class="info-box">
+    <strong>User Story #4:</strong> As a user, I want to receive an alert when I approach
+    or exceed my budget limit so I can adjust my spending.<br>
+    <span class="text-muted">
+        Acceptance: Warning at alert_threshold%. "Exceeded" when 100%+.
+        Notifications are created automatically by the system.
+    </span>
+</div>
+{% endblock %}

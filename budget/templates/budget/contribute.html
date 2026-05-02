@@ -1,0 +1,94 @@
+{% extends 'budget/base.html' %}
+{% block title %}Contribute to Goal – BudgetApp{% endblock %}
+
+{% block content %}
+<!--
+    ===============================================================
+    User Story #5 – Contribute to Savings Goal
+    Developed by: زياد
+    Description : Add money to an existing savings goal and
+                  watch the progress bar update.
+    ===============================================================
+-->
+
+<div class="page-header">
+    <div>
+        <h2>Contribute to Goal</h2>
+        <p>User Story #5 – Add money to your savings goal</p>
+    </div>
+    <a href="{% url 'goals' %}" class="btn btn-outline">&#8592; Back to Goals</a>
+</div>
+
+<div style="max-width:560px; margin:0 auto;">
+
+    <!-- Goal progress summary -->
+    <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">{{ goal.name }}</div>
+        <div class="card-body">
+
+            <!-- Progress bar -->
+            <div class="progress-wrap" style="margin-bottom:8px;">
+                <div
+                    class="progress-bar {% if goal.status == 'completed' %}progress-green{% else %}progress-blue{% endif %}"
+                    data-width="{{ goal.get_completion_percentage }}"
+                ></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#555; margin-bottom:8px;">
+                <span>Saved: <strong>{{ goal.current_amount }} EGP</strong></span>
+                <span><strong>{{ goal.get_completion_percentage }}%</strong></span>
+                <span>Target: <strong>{{ goal.target_amount }} EGP</strong></span>
+            </div>
+
+            <div style="margin-top:8px; font-size:0.85rem; color:#777;">
+                Remaining: <strong>{{ remaining }} EGP</strong> &nbsp;|&nbsp;
+                Deadline: {{ goal.deadline }}
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Contribution form -->
+    <div class="card">
+        <div class="card-header">Add Contribution</div>
+        <div class="card-body">
+
+            <form method="POST" action="{% url 'contribute' goal.id %}">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="amount">Amount to Add (EGP)</label>
+                    <input
+                        type="number"
+                        id="amount"
+                        name="amount"
+                        class="form-control"
+                        placeholder="e.g. 200"
+                        step="0.01"
+                        min="0.01"
+                    >
+                    {% if errors.amount %}
+                        <div class="form-error">{{ errors.amount }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                    <a href="{% url 'goals' %}" class="btn btn-outline">Cancel</a>
+                    <button type="submit" class="btn btn-success">Add Money</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <div class="info-box">
+        <strong>User Story #5:</strong> As a logged-in user, I want to contribute money
+        towards my savings goal so I can reach my target amount.<br>
+        <span class="text-muted">
+            Acceptance: Amount &gt; 0. Progress bar updates.
+            Status becomes "completed" when saved &ge; target.
+        </span>
+    </div>
+
+</div>
+{% endblock %}
