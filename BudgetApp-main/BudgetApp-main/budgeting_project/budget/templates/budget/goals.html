@@ -1,0 +1,152 @@
+{% extends 'budget/base.html' %}
+{% block title %}Savings Goals – BudgetApp{% endblock %}
+
+{% block content %}
+<!--
+    ===============================================================
+    User Story #5 – Set & Track Savings Goals
+    Developed by: زياد
+    Description : Create a savings goal (name, target, deadline)
+                  and contribute money towards it over time.
+    ===============================================================
+-->
+
+<div class="page-header">
+    <div>
+        <h2>Savings Goals</h2>
+        <p>User Story #5 – Set and track your savings goals</p>
+    </div>
+</div>
+
+<div class="grid-2">
+
+    <!-- Left: create a new goal -->
+    <div class="card">
+        <div class="card-header">+ New Goal</div>
+        <div class="card-body">
+
+            <form method="POST" action="{% url 'goals' %}">
+                {% csrf_token %}
+
+                <!-- Goal Name -->
+                <div class="form-group">
+                    <label for="name">Goal Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        class="form-control"
+                        placeholder="e.g. Emergency Fund, Vacation"
+                        value="{{ old.name }}"
+                    >
+                    {% if errors.name %}
+                        <div class="form-error">{{ errors.name }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Target Amount -->
+                <div class="form-group">
+                    <label for="target_amount">Target Amount (EGP)</label>
+                    <input
+                        type="number"
+                        id="target_amount"
+                        name="target_amount"
+                        class="form-control"
+                        placeholder="e.g. 5000"
+                        step="0.01"
+                        min="0.01"
+                        value="{{ old.target_amount }}"
+                    >
+                    {% if errors.target_amount %}
+                        <div class="form-error">{{ errors.target_amount }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Deadline -->
+                <div class="form-group">
+                    <label for="deadline">Deadline</label>
+                    <input
+                        type="date"
+                        id="deadline"
+                        name="deadline"
+                        class="form-control"
+                        value="{{ old.deadline }}"
+                    >
+                    {% if errors.deadline %}
+                        <div class="form-error">{{ errors.deadline }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    Create Goal
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Right: list of existing goals -->
+    <div>
+
+        {% if goals %}
+            {% for goal in goals %}
+            <div class="card goal-card">
+                <div class="card-header">
+                    <span>{{ goal.name }}</span>
+                    {% if goal.status == 'completed' %}
+                        <span class="badge badge-green">Completed</span>
+                    {% else %}
+                        <span class="badge badge-blue">Active</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+
+                    <!-- Progress bar -->
+                    <div class="progress-wrap goal-progress-wrap">
+                        <div
+                            class="progress-bar {% if goal.status == 'completed' %}progress-green{% else %}progress-blue{% endif %}"
+                            data-width="{{ goal.get_completion_percentage }}"
+                        ></div>
+                    </div>
+                    <div class="goal-meta-row">
+                        <span>Saved: {{ goal.current_amount }} EGP</span>
+                        <span class="goal-center">{{ goal.get_completion_percentage }}%</span>
+                        <span class="goal-right">Target: {{ goal.target_amount }} EGP</span>
+                    </div>
+
+                    <div class="goal-footer-row">
+                        <span class="goal-deadline">
+                            Deadline: {{ goal.deadline }}
+                        </span>
+                        {% if goal.status != 'completed' %}
+                        <a href="{% url 'contribute' goal.id %}" class="btn btn-cyan-neo btn-sm">
+                            + Contribute
+                        </a>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+            <!-- No goals yet -->
+            <div class="empty-state">
+                <h3>No goals yet</h3>
+                <p>Use the form on the left to create your first savings goal.</p>
+            </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+<div class="info-box">
+    <strong>User Story #5:</strong> As a logged-in user, I want to set a savings goal
+    with a name, target, and deadline so I can track my progress.<br>
+    <span class="text-muted">
+        Acceptance: Target &gt; 0. Progress percentage updates as contributions are added.
+        Status changes to "completed" when goal is reached.
+    </span>
+</div>
+{% endblock %}

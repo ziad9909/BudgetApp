@@ -1,0 +1,90 @@
+{% extends 'budget/base.html' %}
+{% block title %}Budgets – BudgetApp{% endblock %}
+
+{% block content %}
+<!--
+    ===============================================================
+    User Story #3 – Budget List
+    Developed by: ملك
+    Description : Shows all budgets with a progress bar so the
+                  user can see how much of each budget was spent.
+    ===============================================================
+-->
+
+<div class="page-header">
+    <div>
+        <h2>Budgets</h2>
+        <p>User Story #3 – Your spending limits per category</p>
+    </div>
+    <a href="{% url 'create_budget' %}" class="btn btn-primary">+ New Budget</a>
+</div>
+
+{% if budgets %}
+    <div class="grid-3">
+        {% for b in budgets %}
+        <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between;">
+                <span>{{ b.category }}</span>
+                {% if b.check_limit == 'exceeded' %}
+                    <span class="badge badge-red">Exceeded!</span>
+                {% elif b.check_limit == 'warning' %}
+                    <span class="badge badge-orange">Warning</span>
+                {% else %}
+                    <span class="badge badge-green">OK</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+
+                <!-- Spent / Limit amounts -->
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-size:0.875rem; color:#a8b3d6;">
+                        Spent: <strong>{{ b.spent_amount }} EGP</strong>
+                    </span>
+                    <span style="font-size:0.875rem; color:#a8b3d6;">
+                        Limit: <strong>{{ b.limit_amount }} EGP</strong>
+                    </span>
+                </div>
+
+                <!-- Progress bar (data-width is read by the JS in base.html) -->
+                <div class="progress-wrap" style="margin-bottom:8px;">
+                    {% if b.check_limit == 'exceeded' %}
+                        <div class="progress-bar progress-red"
+                             data-width="{{ b.get_percentage }}"></div>
+                    {% elif b.check_limit == 'warning' %}
+                        <div class="progress-bar progress-yellow"
+                             data-width="{{ b.get_percentage }}"></div>
+                    {% else %}
+                        <div class="progress-bar progress-green"
+                             data-width="{{ b.get_percentage }}"></div>
+                    {% endif %}
+                </div>
+
+                <div style="text-align:right; font-size:0.8rem; color:#8f9bc4; margin-bottom:12px;">
+                    {{ b.get_percentage }}% used
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#8f9bc4;">
+                    <span>{{ b.start_date }} – {{ b.end_date }}</span>
+                    <a href="{% url 'edit_budget' b.id %}" class="btn btn-sm btn-cyan-neo">Edit</a>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% else %}
+    <!-- No budgets yet -->
+    <div class="empty-state">
+            <div style="font-size:2rem; color:#6f7da8;">—</div>
+        <h3>No budgets yet</h3>
+        <p>Create your first budget to start tracking your spending limits.</p>
+        <a href="{% url 'create_budget' %}" class="btn btn-primary">+ Create Budget</a>
+    </div>
+{% endif %}
+
+<div class="info-box">
+    <strong>User Story #3:</strong> As a logged-in user, I want to set a monthly spending limit
+    per category so I stay within my target. Progress bars show spending at a glance.
+</div>
+{% endblock %}
