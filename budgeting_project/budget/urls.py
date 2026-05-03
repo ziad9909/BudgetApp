@@ -22,7 +22,8 @@ urlpatterns = [
     # ── US3 – Budgets ───────────────────────────────────────────────────────
     path('budgets/',              views.budget_list_view,   name='budget_list'),
     path('budgets/create/',       views.create_budget_view, name='create_budget'),
-    path('budgets/edit/<int:budget_id>/', views.edit_budget_view, name='edit_budget'),
+    path('budgets/edit/<int:budget_id>/',        views.edit_budget_view,        name='edit_budget'),
+    path('budgets/recalculate/<int:budget_id>/', views.recalculate_budget_view, name='recalculate_budget'),
 
     # ── US4 – Alerts ────────────────────────────────────────────────────────
     path('alerts/', views.alerts_view, name='alerts'),

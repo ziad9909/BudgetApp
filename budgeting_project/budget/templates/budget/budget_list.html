@@ -65,7 +65,12 @@
 
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#8f9bc4;">
                     <span>{{ b.start_date }} – {{ b.end_date }}</span>
-                    <a href="{% url 'edit_budget' b.id %}" class="btn btn-sm btn-cyan-neo">Edit</a>
+                    <div style="display:flex; gap:6px;">
+                        <a href="{% url 'recalculate_budget' b.id %}"
+                           class="btn btn-sm btn-outline"
+                           title="Sync spent amount from your transactions">Sync</a>
+                        <a href="{% url 'edit_budget' b.id %}" class="btn btn-sm btn-cyan-neo">Edit</a>
+                    </div>
                 </div>
 
             </div>

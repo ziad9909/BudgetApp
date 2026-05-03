@@ -1,11 +1,21 @@
 from decimal import Decimal
+from django.db import models
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from .models import Transaction, Budget, SavingsGoal, Notification
+
+
+def _budget_period_overlaps(user, category, start_date, end_date, exclude_pk=None):
+    """True if another budget exists for the same category with an overlapping date range (SRS US #4)."""
+    qs = Budget.objects.filter(user=user, category=category)
+    if exclude_pk is not None:
+        qs = qs.exclude(pk=exclude_pk)
+    return qs.filter(start_date__lte=end_date, end_date__gte=start_date).exists()
 
 
 # US1 - Sign up
@@ -117,35 +127,39 @@ def transaction_list_view(request):
 
 
 def _check_budget(request, transaction):
-    # find the active budget for this category and update it
-    today = timezone.localdate()
-    try:
-        budget = Budget.objects.get(
+    # Match by the transaction's own date so budgets covering the expense date always apply,
+    # regardless of server timezone. SRS: one budget per category per overlapping period.
+    budget = (
+        Budget.objects.filter(
             user=request.user,
             category=transaction.category,
-            start_date__lte=today,
-            end_date__gte=today,
+            start_date__lte=transaction.date,
+            end_date__gte=transaction.date,
         )
-        budget.spent_amount += Decimal(str(transaction.amount))
-        budget.save()
+        .order_by('-start_date', '-id')
+        .first()
+    )
+    if not budget:
+        return
 
-        status = budget.check_limit()
-        if status == 'exceeded':
-            Notification.objects.create(
-                user=request.user,
-                message=f'You exceeded your {transaction.category} budget!',
-                notif_type='BUDGET_EXCEEDED',
-            )
-            messages.warning(request, f'You exceeded your {transaction.category} budget!')
-        elif status == 'warning':
-            Notification.objects.create(
-                user=request.user,
-                message=f'You are close to your {transaction.category} budget limit.',
-                notif_type='BUDGET_ALERT',
-            )
-            messages.warning(request, f'You are close to your {transaction.category} budget limit.')
-    except Budget.DoesNotExist:
-        pass
+    budget.spent_amount += Decimal(str(transaction.amount))
+    budget.save()
+
+    status = budget.check_limit()
+    if status == 'exceeded':
+        Notification.objects.create(
+            user=request.user,
+            message=f'You exceeded your {transaction.category} budget!',
+            notif_type='BUDGET_EXCEEDED',
+        )
+        messages.warning(request, f'You exceeded your {transaction.category} budget!')
+    elif status == 'warning':
+        Notification.objects.create(
+            user=request.user,
+            message=f'You are close to your {transaction.category} budget limit.',
+            notif_type='BUDGET_ALERT',
+        )
+        messages.warning(request, f'You are close to your {transaction.category} budget limit.')
 
 
 # US3 - Budgets
@@ -186,11 +200,27 @@ def create_budget_view(request):
             except Exception:
                 errors['limit_amount'] = 'Limit must be a number.'
 
+        sd, ed = parse_date(start), parse_date(end)
+        if not errors and sd and ed and _budget_period_overlaps(request.user, category, sd, ed):
+            errors['category'] = (
+                'A budget for this category already exists for this month. '
+                'Please edit the existing budget instead.'
+            )
+
         if not errors:
+            already_spent = Transaction.objects.filter(
+                user=request.user,
+                transaction_type='expense',
+                category=category,
+                date__gte=start,
+                date__lte=end,
+            ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0')
+
             Budget.objects.create(
                 user=request.user, category=category,
                 limit_amount=limit, start_date=start,
-                end_date=end, alert_threshold=threshold
+                end_date=end, alert_threshold=threshold,
+                spent_amount=already_spent,
             )
             messages.success(request, f"Budget for '{category}' created!")
             return redirect('budget_list')
@@ -226,6 +256,18 @@ def edit_budget_view(request, budget_id):
             except Exception:
                 errors['limit_amount'] = 'Limit must be a number.'
 
+        sd, ed = parse_date(start), parse_date(end)
+        if (
+            not errors
+            and sd
+            and ed
+            and _budget_period_overlaps(request.user, category, sd, ed, exclude_pk=budget.id)
+        ):
+            errors['category'] = (
+                'A budget for this category already exists for this month. '
+                'Please edit the existing budget instead.'
+            )
+
         if not errors:
             if limit < budget.spent_amount:
                 messages.warning(request, f'New limit is lower than what you already spent ({budget.spent_amount} EGP).')
@@ -239,6 +281,23 @@ def edit_budget_view(request, budget_id):
             return redirect('budget_list')
 
     return render(request, 'budget/create_budget.html', {'errors': errors, 'budget': budget, 'action': 'Edit'})
+
+
+@login_required
+def recalculate_budget_view(request, budget_id):
+    """Recalculate spent_amount for a budget from actual transactions."""
+    budget = get_object_or_404(Budget, id=budget_id, user=request.user)
+    spent = Transaction.objects.filter(
+        user=request.user,
+        transaction_type='expense',
+        category=budget.category,
+        date__gte=budget.start_date,
+        date__lte=budget.end_date,
+    ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0')
+    budget.spent_amount = spent
+    budget.save()
+    messages.success(request, f"Budget for '{budget.category}' recalculated: {spent} EGP spent.")
+    return redirect('budget_list')
 
 
 # US4 - Alerts
