@@ -16,10 +16,10 @@
         <h2>{{ action }} Budget</h2>
         <p>User Story #3 – Set or update a monthly spending limit per category</p>
     </div>
-    <a href="{% url 'budget_list' %}" class="btn btn-outline">View All</a>
+    <a href="{% url 'budget_list' %}" class="btn btn-outline btn-view-all">View All</a>
 </div>
 
-<div style="max-width:640px; margin:0 auto;">
+<div class="content-narrow">
 
     <!-- Warning if editing and spending is close to new limit -->
     {% if budget and budget.spent_amount > 0 %}
@@ -130,7 +130,7 @@
 
                 </div>
 
-                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                <div class="action-row">
                     <a href="{% url 'budget_list' %}" class="btn btn-outline">Cancel</a>
                     <button type="submit" class="btn btn-primary">{{ action }} Budget</button>
                 </div>

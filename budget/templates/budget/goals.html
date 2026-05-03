@@ -90,9 +90,9 @@
 
         {% if goals %}
             {% for goal in goals %}
-            <div class="card" style="margin-bottom:20px;">
+            <div class="card goal-card">
                 <div class="card-header">
-                    {{ goal.name }}
+                    <span>{{ goal.name }}</span>
                     {% if goal.status == 'completed' %}
                         <span class="badge badge-green">Completed</span>
                     {% else %}
@@ -102,24 +102,24 @@
                 <div class="card-body">
 
                     <!-- Progress bar -->
-                    <div class="progress-wrap">
+                    <div class="progress-wrap goal-progress-wrap">
                         <div
                             class="progress-bar {% if goal.status == 'completed' %}progress-green{% else %}progress-blue{% endif %}"
                             data-width="{{ goal.get_completion_percentage }}"
                         ></div>
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#555; margin-bottom:12px;">
+                    <div class="goal-meta-row">
                         <span>Saved: {{ goal.current_amount }} EGP</span>
-                        <span>{{ goal.get_completion_percentage }}%</span>
-                        <span>Target: {{ goal.target_amount }} EGP</span>
+                        <span class="goal-center">{{ goal.get_completion_percentage }}%</span>
+                        <span class="goal-right">Target: {{ goal.target_amount }} EGP</span>
                     </div>
 
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="text-muted" style="font-size:0.85rem;">
+                    <div class="goal-footer-row">
+                        <span class="goal-deadline">
                             Deadline: {{ goal.deadline }}
                         </span>
                         {% if goal.status != 'completed' %}
-                        <a href="{% url 'contribute' goal.id %}" class="btn btn-success btn-sm">
+                        <a href="{% url 'contribute' goal.id %}" class="btn btn-cyan-neo btn-sm">
                             + Contribute
                         </a>
                         {% endif %}

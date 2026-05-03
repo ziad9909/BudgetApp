@@ -118,7 +118,7 @@ def transaction_list_view(request):
 
 def _check_budget(request, transaction):
     # find the active budget for this category and update it
-    today = timezone.now().date()
+    today = timezone.localdate()
     try:
         budget = Budget.objects.get(
             user=request.user,
@@ -244,7 +244,7 @@ def edit_budget_view(request, budget_id):
 # US4 - Alerts
 @login_required
 def alerts_view(request):
-    today = timezone.now().date()
+    today = timezone.localdate()
     notifications = Notification.objects.filter(user=request.user)
     notifications.filter(is_read=False).update(is_read=True)
 
@@ -327,9 +327,19 @@ def contribute_to_goal_view(request, goal_id):
 # US6 - Reports
 @login_required
 def reports_view(request):
-    today = timezone.now().date()
-    month = int(request.GET.get('month', today.month))
-    year  = int(request.GET.get('year', today.year))
+    today = timezone.localdate()
+
+    def _int_in_range(raw, default, lo, hi):
+        try:
+            n = int(raw)
+            if lo <= n <= hi:
+                return n
+        except (TypeError, ValueError):
+            pass
+        return default
+
+    month = _int_in_range(request.GET.get('month'), today.month, 1, 12)
+    year = _int_in_range(request.GET.get('year'), today.year, 2000, 2100)
 
     transactions = Transaction.objects.filter(user=request.user, date__month=month, date__year=year)
     expenses     = transactions.filter(transaction_type='expense')
@@ -370,7 +380,7 @@ def reports_view(request):
 # US7 - Dashboard
 @login_required
 def dashboard_view(request):
-    today = timezone.now().date()
+    today = timezone.localdate()
     all_transactions = list(Transaction.objects.filter(user=request.user))
 
     active_budgets = Budget.objects.filter(user=request.user, start_date__lte=today, end_date__gte=today)

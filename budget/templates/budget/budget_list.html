@@ -37,10 +37,10 @@
 
                 <!-- Spent / Limit amounts -->
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <span style="font-size:0.875rem; color:#555;">
+                    <span style="font-size:0.875rem; color:#a8b3d6;">
                         Spent: <strong>{{ b.spent_amount }} EGP</strong>
                     </span>
-                    <span style="font-size:0.875rem; color:#555;">
+                    <span style="font-size:0.875rem; color:#a8b3d6;">
                         Limit: <strong>{{ b.limit_amount }} EGP</strong>
                     </span>
                 </div>
@@ -59,13 +59,13 @@
                     {% endif %}
                 </div>
 
-                <div style="text-align:right; font-size:0.8rem; color:#777; margin-bottom:12px;">
+                <div style="text-align:right; font-size:0.8rem; color:#8f9bc4; margin-bottom:12px;">
                     {{ b.get_percentage }}% used
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#888;">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#8f9bc4;">
                     <span>{{ b.start_date }} – {{ b.end_date }}</span>
-                    <a href="{% url 'edit_budget' b.id %}" class="btn btn-sm btn-outline">Edit</a>
+                    <a href="{% url 'edit_budget' b.id %}" class="btn btn-sm btn-cyan-neo">Edit</a>
                 </div>
 
             </div>
@@ -76,7 +76,7 @@
 {% else %}
     <!-- No budgets yet -->
     <div class="empty-state">
-            <div style="font-size:2rem; color:#ccc;">—</div>
+            <div style="font-size:2rem; color:#6f7da8;">—</div>
         <h3>No budgets yet</h3>
         <p>Create your first budget to start tracking your spending limits.</p>
         <a href="{% url 'create_budget' %}" class="btn btn-primary">+ Create Budget</a>

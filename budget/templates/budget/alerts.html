@@ -27,41 +27,33 @@
         {% if budget_statuses %}
 
             {% for item in budget_statuses %}
-            <div style="margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #f0f0f0;">
+            <div class="active-budget-item" style="padding-bottom:14px; border-bottom:1px solid #2a3458;">
+                <div class="active-budget-top">
+                    <div class="active-budget-name">
+                        <span>{{ item.budget.category }}</span>
+                    </div>
+                    <span class="active-budget-amount">Spent: {{ item.budget.spent_amount }} EGP</span>
+                    <span class="active-budget-percent">{{ item.percentage }}%</span>
+                </div>
 
-                <!-- Category name + status badge -->
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                    <span style="font-weight:600;">{{ item.budget.category }}</span>
+                <div class="active-budget-bottom">
+                    <div class="progress-wrap">
+                        <div class="progress-bar progress-blue"
+                             data-width="{{ item.percentage }}"></div>
+                    </div>
+
                     {% if item.status == 'exceeded' %}
-                        <span class="badge badge-red">Exceeded</span>
+                        <span class="budget-chip budget-chip-high">Exceeded</span>
                     {% elif item.status == 'warning' %}
-                        <span class="badge badge-orange">Warning</span>
+                        <span class="budget-chip budget-chip-medium">Warning</span>
                     {% else %}
-                        <span class="badge badge-green">OK</span>
+                        <span class="budget-chip budget-chip-low">OK</span>
                     {% endif %}
                 </div>
 
-                <!-- Progress bar -->
-                <div class="progress-wrap" style="margin-bottom:6px;">
-                    {% if item.status == 'exceeded' %}
-                        <div class="progress-bar progress-red"
-                             data-width="{{ item.percentage }}"></div>
-                    {% elif item.status == 'warning' %}
-                        <div class="progress-bar progress-yellow"
-                             data-width="{{ item.percentage }}"></div>
-                    {% else %}
-                        <div class="progress-bar progress-green"
-                             data-width="{{ item.percentage }}"></div>
-                    {% endif %}
+                <div style="display:flex; justify-content:flex-end; margin-top:6px; font-size:0.78rem; color:#9fb0d3;">
+                    Limit: {{ item.budget.limit_amount }} EGP
                 </div>
-
-                <!-- Numbers: spent, percentage, limit -->
-                <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:#666;">
-                    <span>Spent: {{ item.budget.spent_amount }} EGP</span>
-                    <span>{{ item.percentage }}%</span>
-                    <span>Limit: {{ item.budget.limit_amount }} EGP</span>
-                </div>
-
             </div>
             {% endfor %}
 
@@ -82,10 +74,14 @@
 
         {% if notifications %}
             {% for n in notifications %}
-            <div class="alert {% if 'exceeded' in n.message|lower %}alert-danger{% else %}alert-warning{% endif %}"
+            <div class="alert notif-history-alert {% if 'exceeded' in n.message|lower %}alert-error{% else %}alert-warning{% endif %}"
                  style="margin-bottom:10px;">
-                <strong>{{ n.notif_type }}</strong> – {{ n.message }}<br>
-                <small class="text-muted">{{ n.created_at|date:"d M Y, H:i" }}</small>
+                <span class="warning-triangle warning-triangle--inline" aria-hidden="true">&#9888;</span>
+                <div class="notif-body">
+                    <strong class="notif-type-line">{{ n.get_notif_type_display }}</strong>
+                    <span class="notif-msg-line">{{ n.message }}</span>
+                    <small class="text-muted notif-time">{{ n.created_at|date:"d M Y, H:i" }}</small>
+                </div>
             </div>
             {% endfor %}
         {% else %}

@@ -16,10 +16,10 @@
         <h2>Contribute to Goal</h2>
         <p>User Story #5 – Add money to your savings goal</p>
     </div>
-    <a href="{% url 'goals' %}" class="btn btn-outline">&#8592; Back to Goals</a>
+    <a href="{% url 'goals' %}" class="btn btn-outline btn-view-all">&#8592; Back to Goals</a>
 </div>
 
-<div style="max-width:560px; margin:0 auto;">
+<div class="content-medium">
 
     <!-- Goal progress summary -->
     <div class="card" style="margin-bottom:24px;">
@@ -33,13 +33,13 @@
                     data-width="{{ goal.get_completion_percentage }}"
                 ></div>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#555; margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#a8b3d6; margin-bottom:8px;">
                 <span>Saved: <strong>{{ goal.current_amount }} EGP</strong></span>
                 <span><strong>{{ goal.get_completion_percentage }}%</strong></span>
                 <span>Target: <strong>{{ goal.target_amount }} EGP</strong></span>
             </div>
 
-            <div style="margin-top:8px; font-size:0.85rem; color:#777;">
+            <div style="margin-top:8px; font-size:0.85rem; color:#8f9bc4;">
                 Remaining: <strong>{{ remaining }} EGP</strong> &nbsp;|&nbsp;
                 Deadline: {{ goal.deadline }}
             </div>
@@ -71,7 +71,7 @@
                     {% endif %}
                 </div>
 
-                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                <div class="action-row">
                     <a href="{% url 'goals' %}" class="btn btn-outline">Cancel</a>
                     <button type="submit" class="btn btn-success">Add Money</button>
                 </div>
