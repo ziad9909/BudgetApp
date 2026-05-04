@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.utils.dateparse import parse_date
-from .models import Transaction, Budget, SavingsGoal, Notification
+from .models import Transaction, Budget, SavingsGoal, Notification, Subscription
 
 # Spending-overview donut: violet / indigo / lavender — matches sidebar + brand gradient (#8b5cf6 …).
 _EXPENSE_BREAKDOWN_PALETTE = [
@@ -555,3 +555,84 @@ def dashboard_view(request):
         'dashboard_pie_values': dashboard_pie_values,
         'dashboard_pie_colors': dashboard_pie_colors,
     })
+
+
+# Subscriptions
+@login_required
+def subscriptions_view(request):
+    errors = {}
+
+    if request.method == 'POST':
+        name        = request.POST.get('name', '').strip()
+        amt_str     = request.POST.get('amount', '').strip()
+        billing_day = request.POST.get('billing_day', '1').strip()
+        category    = request.POST.get('category', 'Subscription').strip()
+
+        if not name:
+            errors['name'] = 'Name is required.'
+        amount = None
+        if not amt_str:
+            errors['amount'] = 'Amount is required.'
+        else:
+            try:
+                amount = Decimal(amt_str)
+                if amount <= 0:
+                    errors['amount'] = 'Amount must be greater than zero.'
+            except Exception:
+                errors['amount'] = 'Amount must be a number.'
+        try:
+            billing_day = int(billing_day)
+            if not (1 <= billing_day <= 28):
+                errors['billing_day'] = 'Day must be between 1 and 28.'
+        except ValueError:
+            errors['billing_day'] = 'Day must be a number.'
+
+        if not errors:
+            Subscription.objects.create(
+                user=request.user,
+                name=name,
+                amount=amount,
+                billing_day=billing_day,
+                category=category or 'Subscription',
+            )
+            messages.success(request, f"Subscription '{name}' added!")
+            return redirect('subscriptions')
+
+    subs = Subscription.objects.filter(user=request.user, is_active=True)
+    return render(request, 'budget/subscriptions.html', {
+        'subscriptions': subs,
+        'errors': errors,
+        'old': request.POST,
+    })
+
+
+@login_required
+def pay_subscription_view(request, sub_id):
+    sub = get_object_or_404(Subscription, id=sub_id, user=request.user)
+    today = timezone.localdate()
+
+    t = Transaction.objects.create(
+        user=request.user,
+        transaction_type='expense',
+        amount=sub.amount,
+        category=sub.category,
+        date=today,
+        payment_method='online',
+        notes=f'Monthly subscription: {sub.name}',
+    )
+    _check_budget(request, t)
+
+    sub.last_paid = today
+    sub.save()
+
+    messages.success(request, f"Paid {sub.amount} EGP for '{sub.name}'.")
+    return redirect('subscriptions')
+
+
+@login_required
+def delete_subscription_view(request, sub_id):
+    sub = get_object_or_404(Subscription, id=sub_id, user=request.user)
+    name = sub.name
+    sub.delete()
+    messages.success(request, f"Subscription '{name}' removed.")
+    return redirect('subscriptions')

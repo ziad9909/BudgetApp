@@ -34,4 +34,9 @@ urlpatterns = [
 
     # ── US6 – Reports ───────────────────────────────────────────────────────
     path('reports/', views.reports_view, name='reports'),
+
+    # ── Subscriptions ───────────────────────────────────────────────────────
+    path('subscriptions/',                          views.subscriptions_view,       name='subscriptions'),
+    path('subscriptions/pay/<int:sub_id>/',         views.pay_subscription_view,    name='pay_subscription'),
+    path('subscriptions/delete/<int:sub_id>/',      views.delete_subscription_view, name='delete_subscription'),
 ]
