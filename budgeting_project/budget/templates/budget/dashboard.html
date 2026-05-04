@@ -203,6 +203,37 @@
 
     <!-- Right column -->
     <div>
+        <div class="card">
+            <div class="card-header">Spending Overview</div>
+            <div class="card-body" style="padding:20px;">
+                {% if expense_breakdown %}
+                <div style="display:grid; grid-template-columns: 190px 1fr; gap:18px; align-items:center;">
+                    <div style="position:relative; width:180px; height:180px; margin:auto;">
+                        <canvas id="dashboardExpensePieChart" width="180" height="180"></canvas>
+                        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; pointer-events:none;">
+                            <strong style="font-size:1.15rem; color:#ecf2ff;">{{ monthly_expenses|floatformat:2 }}</strong>
+                            <span style="font-size:0.75rem; color:#9fb0d3; font-weight:600;">EGP</span>
+                        </div>
+                    </div>
+                    <div>
+                        {% for item in expense_breakdown %}
+                        <div style="display:grid; grid-template-columns: 14px 1fr auto; align-items:center; gap:10px; margin-bottom:8px;">
+                            <span style="width:10px; height:10px; border-radius:50%; background:{{ item.color }}; box-shadow:0 0 10px {{ item.color }}66;"></span>
+                            <span style="font-size:0.88rem; color:#e6ecff;">{{ item.category }}</span>
+                            <span style="font-size:0.85rem; color:#b8c4e4;">{{ item.percentage|floatformat:1 }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state" style="padding:22px 14px;">
+                    <h5>No expenses this month</h5>
+                    <p class="text-muted">Add expense transactions to see spending analysis.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
         <!-- Goals -->
         <div class="card">
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
@@ -264,5 +295,51 @@
     <strong>User Story #7:</strong> Home screen showing total balance, recent transactions, active budgets, and goal progress.<br>
     <span class="text-muted">Acceptance: calculateTotalBalance(), calculateMonthlyIncome(), calculateMonthlyExpenses() run on load. Placeholders shown when no data exists.</span>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+{{ dashboard_pie_labels|json_script:"dashboard-pie-labels" }}
+{{ dashboard_pie_values|json_script:"dashboard-pie-values" }}
+{{ dashboard_pie_colors|json_script:"dashboard-pie-colors" }}
+<script>
+    (function () {
+        var canvas = document.getElementById('dashboardExpensePieChart');
+        if (!canvas) return;
+        if (typeof Chart === 'undefined') return;
+
+        var labels = JSON.parse(document.getElementById('dashboard-pie-labels').textContent);
+        var values = JSON.parse(document.getElementById('dashboard-pie-values').textContent);
+        var colors = JSON.parse(document.getElementById('dashboard-pie-colors').textContent);
+
+        new Chart(canvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                    borderColor: 'rgba(30, 41, 59, 0.55)',
+                    borderWidth: 1,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                cutout: '66%',
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return ctx.label + ': ' + Number(ctx.raw).toFixed(2) + ' EGP';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    })();
+</script>
 {% endblock %}
 

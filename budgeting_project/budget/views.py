@@ -9,6 +9,18 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from .models import Transaction, Budget, SavingsGoal, Notification
 
+# Spending-overview donut: violet / indigo / lavender — matches sidebar + brand gradient (#8b5cf6 …).
+_EXPENSE_BREAKDOWN_PALETTE = [
+    '#8b5cf6',
+    '#a78bfa',
+    '#c4b5fd',
+    '#7c3aed',
+    '#6366f1',
+    '#a855f7',
+    '#9333ea',
+    '#6d28d9',
+]
+
 
 def _budget_period_overlaps(user, category, start_date, end_date, exclude_pk=None):
     """True if another budget exists for the same category with an overlapping date range (SRS US #4)."""
@@ -123,7 +135,33 @@ def add_transaction_view(request):
 @login_required
 def transaction_list_view(request):
     transactions = Transaction.objects.filter(user=request.user)
-    return render(request, 'budget/transaction_list.html', {'transactions': transactions})
+    query = request.GET.get('q', '').strip()
+    category = request.GET.get('category', '').strip()
+
+    if query:
+        transactions = transactions.filter(
+            models.Q(category__icontains=query)
+            | models.Q(notes__icontains=query)
+            | models.Q(payment_method__icontains=query)
+            | models.Q(transaction_type__icontains=query)
+        )
+
+    if category:
+        transactions = transactions.filter(category=category)
+
+    categories = (
+        Transaction.objects.filter(user=request.user)
+        .values_list('category', flat=True)
+        .distinct()
+        .order_by('category')
+    )
+
+    return render(request, 'budget/transaction_list.html', {
+        'transactions': transactions,
+        'categories': categories,
+        'query': query,
+        'selected_category': category,
+    })
 
 
 def _check_budget(request, transaction):
@@ -410,6 +448,21 @@ def reports_view(request):
     category_totals = {}
     for t in expenses:
         category_totals[t.category] = category_totals.get(t.category, 0) + float(t.amount)
+    expense_analysis = []
+    for cat, total in category_totals.items():
+        percentage = (total / total_expenses * 100) if total_expenses else 0
+        expense_analysis.append({
+            'category': cat,
+            'total': total,
+            'percentage': round(percentage, 1),
+        })
+    expense_analysis.sort(key=lambda item: item['total'], reverse=True)
+    for i, item in enumerate(expense_analysis):
+        item['color'] = _EXPENSE_BREAKDOWN_PALETTE[i % len(_EXPENSE_BREAKDOWN_PALETTE)]
+    report_pie_labels = [item['category'] for item in expense_analysis]
+    report_pie_values = [item['total'] for item in expense_analysis]
+    report_pie_colors = [item['color'] for item in expense_analysis]
+    top_expense_category = expense_analysis[0] if expense_analysis else None
 
     if total_income > total_expenses:
         insight = f'You saved {total_income - total_expenses:.2f} EGP this month.'
@@ -429,6 +482,11 @@ def reports_view(request):
         'total_income': total_income,
         'total_expenses': total_expenses,
         'category_totals': category_totals,
+        'expense_analysis': expense_analysis,
+        'report_pie_labels': report_pie_labels,
+        'report_pie_values': report_pie_values,
+        'report_pie_colors': report_pie_colors,
+        'top_expense_category': top_expense_category,
         'insight': insight,
         'month': month,
         'year': year,
@@ -458,6 +516,25 @@ def dashboard_view(request):
         float(t.amount) for t in all_transactions
         if t.transaction_type == 'expense' and t.date.month == today.month and t.date.year == today.year
     )
+    monthly_expense_totals = {}
+    for t in all_transactions:
+        if t.transaction_type == 'expense' and t.date.month == today.month and t.date.year == today.year:
+            monthly_expense_totals[t.category] = monthly_expense_totals.get(t.category, 0) + float(t.amount)
+
+    expense_breakdown = []
+    for category, total in monthly_expense_totals.items():
+        percentage = (total / monthly_expenses * 100) if monthly_expenses else 0
+        expense_breakdown.append({
+            'category': category,
+            'total': total,
+            'percentage': round(percentage, 1),
+        })
+    expense_breakdown.sort(key=lambda item: item['total'], reverse=True)
+    for i, item in enumerate(expense_breakdown):
+        item['color'] = _EXPENSE_BREAKDOWN_PALETTE[i % len(_EXPENSE_BREAKDOWN_PALETTE)]
+    dashboard_pie_labels = [item['category'] for item in expense_breakdown]
+    dashboard_pie_values = [item['total'] for item in expense_breakdown]
+    dashboard_pie_colors = [item['color'] for item in expense_breakdown]
 
     budget_warnings = [
         {'budget': b, 'status': b.check_limit()}
@@ -473,4 +550,8 @@ def dashboard_view(request):
         'goals': goals,
         'notifications': notifications,
         'budget_warnings': budget_warnings,
+        'expense_breakdown': expense_breakdown,
+        'dashboard_pie_labels': dashboard_pie_labels,
+        'dashboard_pie_values': dashboard_pie_values,
+        'dashboard_pie_colors': dashboard_pie_colors,
     })
