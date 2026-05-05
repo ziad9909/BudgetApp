@@ -1,0 +1,345 @@
+{% extends 'budget/base.html' %}
+{% block title %}Dashboard – BudgetApp{% endblock %}
+
+{% block content %}
+<!--
+    ===============================================================
+    User Story #7 – Dashboard Overview
+    Developed by: زياد
+    Description : Home screen shows total balance, recent
+                  transactions, active budgets, and goal progress.
+    ===============================================================
+-->
+
+<div class="page-header">
+    <div>
+        <h2>Dashboard</h2>
+        <p class="welcome-subtitle">
+            <span class="welcome-line">Welcome, {{ user.username }}</span>
+            <span class="welcome-line">Your financial overview at a glance</span>
+        </p>
+    </div>
+    <a href="{% url 'add_transaction' %}" class="btn btn-primary">+ Add Transaction</a>
+</div>
+
+<!-- Budget Warnings (same row layout + style as Alerts notification history) -->
+{% for item in budget_warnings %}
+<div class="alert notif-history-alert {% if item.status == 'exceeded' %}alert-error{% else %}alert-warning{% endif %}">
+    <span class="warning-triangle warning-triangle--inline" aria-hidden="true">&#9888;</span>
+    <div class="notif-body">
+        {% if item.status == 'exceeded' %}
+        <strong class="notif-type-line">Budget Exceeded</strong>
+        <span class="notif-msg-line">You've gone over your {{ item.budget.category }} budget limit.</span>
+        {% else %}
+        <strong class="notif-type-line">Budget Alert</strong>
+        <span class="notif-msg-line">You are close to your {{ item.budget.category }} budget limit.</span>
+        {% endif %}
+        <small class="text-muted notif-time">{% now "d M Y, H:i" %}</small>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Stat Cards (scale on mouse hover) -->
+<div class="stat-row">
+    <div class="stat-card stat-balance">
+        <div class="stat-icon-wrap icon-cyan">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+        </div>
+        <div class="stat-label">Total Balance</div>
+        <div class="stat-value text-cyan">
+            {{ total_balance }} EGP
+        </div>
+        <div class="stat-sub">
+            <span class="stat-sub-accent cyan">{{ balance_change|default:"+85%" }}</span> <span class="stat-sub-tail">from last month</span>
+        </div>
+    </div>
+    <div class="stat-card stat-income">
+        <div class="stat-icon-wrap icon-income">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+            </svg>
+        </div>
+        <div class="stat-label">Monthly Income</div>
+        <div class="stat-value text-success">{{ monthly_income }} EGP</div>
+        <div class="stat-sub">
+            <span class="stat-sub-accent green">{{ income_change|default:"+12%" }}</span> <span class="stat-sub-tail">from last month</span>
+        </div>
+    </div>
+    <div class="stat-card stat-expense">
+        <div class="stat-icon-wrap icon-expense">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>
+            </svg>
+        </div>
+        <div class="stat-label">Monthly Expenses</div>
+        <div class="stat-value text-danger">{{ monthly_expenses }} EGP</div>
+        <div class="stat-sub">
+            <span class="stat-sub-accent pink">{{ expense_change|default:"-34%" }}</span> <span class="stat-sub-tail">from last month</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Grid -->
+<div class="row col-7-5">
+
+    <!-- Left column -->
+    <div>
+        <!-- Recent Transactions -->
+        <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Recent Transactions</span>
+                <a href="{% url 'transaction_list' %}" class="btn btn-sm btn-outline btn-view-all">View All</a>
+            </div>
+            <div class="card-body" style="padding:0;">
+                {% if recent_transactions %}
+                <table>
+                    <thead>
+                        <tr><th>Date</th><th>Category</th><th>Amount</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for t in recent_transactions %}
+                        <tr>
+                            <td class="text-muted">{{ t.date }}</td>
+                            <td>
+                                <div class="category-cell">
+                                    {% if t.category|lower == 'rent' %}
+                                    <svg class="category-icon-rent" viewBox="0 0 24 24">
+                                        <path d="M3 10.5 12 3l9 7.5"/>
+                                        <path d="M5 9.5V21h14V9.5"/>
+                                        <path d="M9 21v-6h6v6"/>
+                                    </svg>
+                                    {% elif t.category|lower == 'freelance' %}
+                                    <svg class="category-icon-freelance" viewBox="0 0 24 24">
+                                        <rect x="3" y="7" width="18" height="13" rx="2"/>
+                                        <path d="M9 7V5h6v2"/>
+                                        <path d="M3 12h18"/>
+                                    </svg>
+                                    {% else %}
+                                    <svg class="category-icon-default" viewBox="0 0 24 24">
+                                        <path d="M4 7h16l-2 12H6L4 7z"/>
+                                        <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+                                    </svg>
+                                    {% endif %}
+                                    <span class="category-name">{{ t.category }}</span>
+                                </div>
+                            </td>
+                            <td style="font-weight:700;" class="{% if t.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                                {% if t.transaction_type == 'income' %}+{% else %}-{% endif %}{{ t.amount }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">
+                    <h5>No transactions yet</h5>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Active Budgets -->
+        <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Active Budgets</span>
+                <a href="{% url 'budget_list' %}" class="btn btn-sm btn-outline btn-view-all">View All</a>
+            </div>
+            <div class="card-body">
+                {% if active_budgets %}
+                    {% for b in active_budgets %}
+                    <div class="active-budget-item">
+                        <div class="active-budget-top">
+                            <div class="active-budget-name">
+                                {% if b.category|lower == 'rent' %}
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M3 10.5 12 3l9 7.5"/>
+                                    <path d="M5 9.5V21h14V9.5"/>
+                                    <path d="M9 21v-6h6v6"/>
+                                </svg>
+                                {% elif b.category|lower == 'groceries' %}
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="9" cy="20" r="1.5"/>
+                                    <circle cx="18" cy="20" r="1.5"/>
+                                    <path d="M3 4h2l2.5 10.5h10L22 7H8"/>
+                                </svg>
+                                {% else %}
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M4 7h16l-2 12H6L4 7z"/>
+                                    <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+                                </svg>
+                                {% endif %}
+                                <span>{{ b.category }}</span>
+                            </div>
+                            <span class="active-budget-amount">{{ b.spent_amount }} / {{ b.limit_amount }} EGP</span>
+                            <span class="active-budget-percent">{{ b.get_percentage|floatformat:1 }}%</span>
+                        </div>
+                        <div class="active-budget-bottom">
+                            <div class="progress-wrap">
+                                <div class="progress-bar
+                                    {% cycle 'progress-pink' 'progress-cyan' 'progress-teal' 'progress-violet' %}"
+                                    data-width="{{ b.get_percentage }}">
+                                </div>
+                            </div>
+                            {% if b.check_limit == 'exceeded' %}
+                                <span class="budget-chip budget-chip-high">High</span>
+                            {% elif b.check_limit == 'warning' %}
+                                <span class="budget-chip budget-chip-medium">Medium</span>
+                            {% else %}
+                                <span class="budget-chip budget-chip-low">Low</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <p>No active budgets. <a href="{% url 'create_budget' %}" style="color:#67e8f9;">Create one</a>.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right column -->
+    <div>
+        <div class="card">
+            <div class="card-header">Spending Overview</div>
+            <div class="card-body" style="padding:20px;">
+                {% if expense_breakdown %}
+                <div style="display:grid; grid-template-columns: 190px 1fr; gap:18px; align-items:center;">
+                    <div style="position:relative; width:180px; height:180px; margin:auto;">
+                        <canvas id="dashboardExpensePieChart" width="180" height="180"></canvas>
+                        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; pointer-events:none;">
+                            <strong style="font-size:1.15rem; color:#ecf2ff;">{{ monthly_expenses|floatformat:2 }}</strong>
+                            <span style="font-size:0.75rem; color:#9fb0d3; font-weight:600;">EGP</span>
+                        </div>
+                    </div>
+                    <div>
+                        {% for item in expense_breakdown %}
+                        <div style="display:grid; grid-template-columns: 14px 1fr auto; align-items:center; gap:10px; margin-bottom:8px;">
+                            <span style="width:10px; height:10px; border-radius:50%; background:{{ item.color }}; box-shadow:0 0 10px {{ item.color }}66;"></span>
+                            <span style="font-size:0.88rem; color:#e6ecff;">{{ item.category }}</span>
+                            <span style="font-size:0.85rem; color:#b8c4e4;">{{ item.percentage|floatformat:1 }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state" style="padding:22px 14px;">
+                    <h5>No expenses this month</h5>
+                    <p class="text-muted">Add expense transactions to see spending analysis.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Goals -->
+        <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>My Goals</span>
+                <a href="{% url 'goals' %}" class="btn btn-sm btn-outline btn-view-all">View All</a>
+            </div>
+            <div class="card-body">
+                {% if goals %}
+                    {% for goal in goals %}
+                    <div style="margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.88rem; margin-bottom:5px;">
+                            <strong>{{ goal.name }}</strong>
+                            <span class="text-muted">{{ goal.get_completion_percentage }}%</span>
+                        </div>
+                        <div class="progress-wrap">
+                            <div class="progress-bar progress-blue" data-width="{{ goal.get_completion_percentage }}"></div>
+                        </div>
+                        <small class="text-muted">{{ goal.current_amount }} / {{ goal.target_amount }} EGP</small>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <p>No goals. <a href="{% url 'goals' %}" style="color:#67e8f9;">Set a goal</a>.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Notifications {% if notifications %}<span class="badge badge-danger">{{ notifications.count }}</span>{% endif %}</span>
+                <a href="{% url 'alerts' %}" class="btn btn-sm btn-outline btn-view-all">View All</a>
+            </div>
+            <div class="card-body" style="padding:0;">
+                {% if notifications %}
+                <ul class="notif-list">
+                    {% for notif in notifications|slice:":3" %}
+                    <li class="notif-item">
+                        <div class="notif-stack">
+                            <span class="notif-title">{{ notif.get_notif_type_display }}</span>
+                            <span class="notif-msg">{{ notif.message }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <p>No new notifications.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="info-box">
+    <strong>User Story #7:</strong> Home screen showing total balance, recent transactions, active budgets, and goal progress.<br>
+    <span class="text-muted">Acceptance: calculateTotalBalance(), calculateMonthlyIncome(), calculateMonthlyExpenses() run on load. Placeholders shown when no data exists.</span>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+{{ dashboard_pie_labels|json_script:"dashboard-pie-labels" }}
+{{ dashboard_pie_values|json_script:"dashboard-pie-values" }}
+{{ dashboard_pie_colors|json_script:"dashboard-pie-colors" }}
+<script>
+    (function () {
+        var canvas = document.getElementById('dashboardExpensePieChart');
+        if (!canvas) return;
+        if (typeof Chart === 'undefined') return;
+
+        var labels = JSON.parse(document.getElementById('dashboard-pie-labels').textContent);
+        var values = JSON.parse(document.getElementById('dashboard-pie-values').textContent);
+        var colors = JSON.parse(document.getElementById('dashboard-pie-colors').textContent);
+
+        new Chart(canvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                    borderColor: 'rgba(30, 41, 59, 0.55)',
+                    borderWidth: 1,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                cutout: '66%',
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return ctx.label + ': ' + Number(ctx.raw).toFixed(2) + ' EGP';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    })();
+</script>
+{% endblock %}
+
