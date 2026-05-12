@@ -2,14 +2,7 @@
 {% block title %}{{ action }} Budget – BudgetApp{% endblock %}
 
 {% block content %}
-<!--
-    ===============================================================
-    User Story #3 – Create / Edit Budget
-    Developed by: ملك
-    Description : Set or update a monthly spending limit per category
-                  so the user has a clear target to stay within.
-    ===============================================================
--->
+
 
 <div class="page-header">
     <div>
@@ -21,7 +14,7 @@
 
 <div class="content-narrow">
 
-    <!-- Warning if editing and spending is close to new limit -->
+    
     {% if budget and budget.spent_amount > 0 %}
     <div class="alert alert-info">
         Current spending: <strong>{{ budget.spent_amount }} EGP</strong>
@@ -34,7 +27,7 @@
         <div class="card-header">Budget Details</div>
         <div class="card-body">
 
-            <!-- Use the correct URL depending on create or edit -->
+            
             {% if action == 'Edit' %}
             <form method="POST" action="{% url 'edit_budget' budget.id %}">
             {% else %}
@@ -42,7 +35,7 @@
             {% endif %}
                 {% csrf_token %}
 
-                <!-- Category -->
+                
                 <div class="form-group">
                     <label for="category">Category</label>
                     <input
@@ -60,7 +53,7 @@
 
                 <div class="form-row">
 
-                    <!-- Spending Limit -->
+                    
                     <div class="form-group">
                         <label for="limit_amount">Spending Limit (EGP)</label>
                         <input
@@ -78,7 +71,7 @@
                         {% endif %}
                     </div>
 
-                    <!-- Alert Threshold -->
+                    
                     <div class="form-group">
                         <label for="alert_threshold">Alert at (% of limit)</label>
                         <input
@@ -98,7 +91,7 @@
 
                 <div class="form-row">
 
-                    <!-- Start Date -->
+                    
                     <div class="form-group">
                         <label for="start_date">Start Date</label>
                         <input
@@ -113,7 +106,7 @@
                         {% endif %}
                     </div>
 
-                    <!-- End Date -->
+                    
                     <div class="form-group">
                         <label for="end_date">End Date</label>
                         <input

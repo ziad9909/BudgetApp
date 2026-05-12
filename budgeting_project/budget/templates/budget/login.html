@@ -2,10 +2,7 @@
 {% block title %}Login – BudgetApp{% endblock %}
 
 {% block content %}
-<!--
-    Login page – plain HTML form, no Django forms.py needed.
-    The view reads username and password directly from request.POST.
--->
+
 
 <div class="narrow">
 
@@ -21,7 +18,7 @@
             <form method="POST" action="{% url 'login' %}">
                 {% csrf_token %}
 
-                <!-- Username field -->
+                
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input
@@ -33,7 +30,7 @@
                     >
                 </div>
 
-                <!-- Password field -->
+                
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input

@@ -1187,12 +1187,10 @@
 <body>
 
 {% if user.is_authenticated %}
-<!-- ══════════════════════════════
-     SIDEBAR (authenticated)
-══════════════════════════════ -->
+
 <aside class="sidebar">
 
-    <!-- Brand -->
+    
     <div class="sidebar-brand">
         <div class="brand-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1205,7 +1203,7 @@
         </div>
     </div>
 
-    <!-- Nav -->
+    
     <nav class="sidebar-nav">
         <div class="nav-section-label">Menu</div>
 
@@ -1270,7 +1268,7 @@
         </a>
     </nav>
 
-    <!-- Footer -->
+    
     <div class="sidebar-footer">
         <div class="sidebar-user-name">{{ user.email|default:user.username }}</div>
         <a href="{% url 'logout' %}" class="sidebar-signout">
@@ -1286,9 +1284,7 @@
 <div class="main-wrapper">
 
 {% else %}
-<!-- ══════════════════════════════
-     TOP BAR (unauthenticated)
-══════════════════════════════ -->
+
 <div style="width:100%; display:flex; flex-direction:column; min-height:100vh;">
 <nav class="topbar">
     <span class="topbar-brand topbar-pill">SmartFinance</span>
@@ -1300,7 +1296,7 @@
 <div style="flex:1;">
 {% endif %}
 
-<!-- ── Flash Messages ── -->
+
 {% if messages %}
 <div class="messages">
     {% for message in messages %}
@@ -1309,18 +1305,18 @@
 </div>
 {% endif %}
 
-<!-- ── Page Content ── -->
+
 <main>
     {% block content %}{% endblock %}
 </main>
 
 {% if user.is_authenticated %}
-</div><!-- end .main-wrapper -->
+</div>
 {% else %}
-</div><!-- end unauthenticated wrapper -->
+</div>
 {% endif %}
 
-<!-- Chart.js -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script>

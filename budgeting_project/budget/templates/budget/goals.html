@@ -2,14 +2,7 @@
 {% block title %}Savings Goals – BudgetApp{% endblock %}
 
 {% block content %}
-<!--
-    ===============================================================
-    User Story #5 – Set & Track Savings Goals
-    Developed by: زياد
-    Description : Create a savings goal (name, target, deadline)
-                  and contribute money towards it over time.
-    ===============================================================
--->
+
 
 <div class="page-header">
     <div>
@@ -20,7 +13,7 @@
 
 <div class="grid-2">
 
-    <!-- Left: create a new goal -->
+    
     <div class="card">
         <div class="card-header">+ New Goal</div>
         <div class="card-body">
@@ -28,7 +21,7 @@
             <form method="POST" action="{% url 'goals' %}">
                 {% csrf_token %}
 
-                <!-- Goal Name -->
+                
                 <div class="form-group">
                     <label for="name">Goal Name</label>
                     <input
@@ -44,7 +37,7 @@
                     {% endif %}
                 </div>
 
-                <!-- Target Amount -->
+                
                 <div class="form-group">
                     <label for="target_amount">Target Amount (EGP)</label>
                     <input
@@ -62,7 +55,7 @@
                     {% endif %}
                 </div>
 
-                <!-- Deadline -->
+                
                 <div class="form-group">
                     <label for="deadline">Deadline</label>
                     <input
@@ -85,7 +78,7 @@
         </div>
     </div>
 
-    <!-- Right: list of existing goals -->
+    
     <div>
 
         {% if goals %}
@@ -101,7 +94,7 @@
                 </div>
                 <div class="card-body">
 
-                    <!-- Progress bar -->
+                    
                     <div class="progress-wrap goal-progress-wrap">
                         <div
                             class="progress-bar {% if goal.status == 'completed' %}progress-green{% else %}progress-blue{% endif %}"
@@ -130,7 +123,7 @@
             {% endfor %}
 
         {% else %}
-            <!-- No goals yet -->
+            
             <div class="empty-state">
                 <h3>No goals yet</h3>
                 <p>Use the form on the left to create your first savings goal.</p>

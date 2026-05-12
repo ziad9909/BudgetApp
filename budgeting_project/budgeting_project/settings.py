@@ -9,8 +9,9 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
+_csrf_trusted = os.environ.get('CSRF_TRUSTED_ORIGINS', '').strip()
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_trusted.split(',') if o.strip()]
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -54,8 +55,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'budgeting_project.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+          
+                                                               
 
 DATABASES = {
     'default': {
@@ -65,18 +66,18 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
+                     
+                                                                              
 
 AUTH_PASSWORD_VALIDATORS = []
 
-# Tell Django where the login page is (our custom login URL)
+                                                            
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
+                      
+                                                    
 
 LANGUAGE_CODE = 'en-us'
 

@@ -2,14 +2,7 @@
 {% block title %}Reports – BudgetApp{% endblock %}
 
 {% block content %}
-<!--
-    ===============================================================
-    User Story #6 – View Reports & Analytics
-    Developed by: زياد
-    Description : The user filters by month and year to see a
-                  summary of income vs expenses and a category chart.
-    ===============================================================
--->
+
 
 <div class="page-header">
     <div>
@@ -18,7 +11,7 @@
     </div>
 </div>
 
-<!-- Filter form – uses GET so the URL shows the selected month/year -->
+
 <div class="card card--overflow-visible" style="margin-bottom:24px;">
     <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <span>Filter by Month</span>
@@ -27,7 +20,7 @@
     <div class="card-body">
         <form method="GET" action="{% url 'reports' %}" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
 
-            <!-- Month: custom rounded panel (native &lt;select&gt; cannot style the open list) -->
+            
             <div class="form-group neo-select-wrap" style="margin-bottom:0; flex:1; min-width:160px;">
                 <label id="month-field-label" for="month-trigger">Month</label>
                 <div class="neo-select" data-neo-select>
@@ -52,7 +45,7 @@
                 </div>
             </div>
 
-            <!-- Year field -->
+            
             <div class="form-group" style="margin-bottom:0; width:130px;">
                 <label for="year">Year</label>
                 <input
@@ -73,7 +66,7 @@
     </div>
 </div>
 
-<!-- Summary cards -->
+
 <div class="stats-row" style="margin-bottom:24px;">
 
     <div class="stat-card stat-green">
@@ -96,15 +89,15 @@
 
 </div>
 
-<!-- Insight message -->
+
 <div class="alert {% if total_income >= total_expenses %}alert-success{% else %}alert-warning{% endif %}" style="margin-bottom:24px;">
     {{ insight }}
 </div>
 
-<!-- Chart + category breakdown -->
+
 <div class="grid-2">
 
-    <!-- Chart.js bar chart -->
+    
     <div class="card">
         <div class="card-header">Income vs Expenses</div>
         <div class="card-body">
@@ -112,7 +105,7 @@
         </div>
     </div>
 
-    <!-- Spending overview donut -->
+    
     <div class="card">
         <div class="card-header">Spending Overview</div>
         <div class="card-body" style="padding:20px;">
@@ -145,7 +138,7 @@
 
 </div>
 
-<!-- Transaction list for this month -->
+
 <div class="card" style="margin-top:24px;">
     <div class="card-header">All Transactions This Month</div>
     <div class="card-body">

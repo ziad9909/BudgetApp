@@ -2,14 +2,7 @@
 {% block title %}Sign Up – BudgetApp{% endblock %}
 
 {% block content %}
-<!--
-    ===============================================================
-    User Story #1 – User Sign-Up
-    Developed by: ملك
-    Description : A new user creates an account with username,
-                  email, and password to start using the app.
-    ===============================================================
--->
+
 
 <div class="narrow">
 
@@ -22,11 +15,11 @@
         <div class="card-header">Sign Up</div>
         <div class="card-body">
 
-            <!-- Sign-up form – sends data to the same URL using POST -->
+            
             <form method="POST" action="{% url 'signup' %}">
                 {% csrf_token %}
 
-                <!-- Username field -->
+                
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input
@@ -42,7 +35,7 @@
                     {% endif %}
                 </div>
 
-                <!-- Email field -->
+                
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <input
@@ -58,7 +51,7 @@
                     {% endif %}
                 </div>
 
-                <!-- Password field -->
+                
                 <div class="form-group">
                     <label for="password1">Password</label>
                     <input
@@ -73,7 +66,7 @@
                     {% endif %}
                 </div>
 
-                <!-- Confirm password field -->
+                
                 <div class="form-group">
                     <label for="password2">Confirm Password</label>
                     <input
@@ -100,7 +93,7 @@
         </div>
     </div>
 
-    <!-- SDS reference box -->
+    
     <div class="info-box">
         <strong>User Story #1:</strong> As a new user, I want to create an account
         with my name, email, and password so I can start using the budgeting app.<br>

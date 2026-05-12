@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from .models import Transaction, Budget, SavingsGoal, Notification, Subscription
 
-# Spending-overview donut: violet / indigo / lavender — matches sidebar + brand gradient (#8b5cf6 …).
+                                                                                                     
 _EXPENSE_BREAKDOWN_PALETTE = [
     '#8b5cf6',
     '#a78bfa',
@@ -30,7 +30,7 @@ def _budget_period_overlaps(user, category, start_date, end_date, exclude_pk=Non
     return qs.filter(start_date__lte=end_date, end_date__gte=start_date).exists()
 
 
-# US1 - Sign up
+               
 def signup_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -87,7 +87,7 @@ def logout_view(request):
     return redirect('login')
 
 
-# US2 - Add transaction
+                       
 @login_required
 def add_transaction_view(request):
     errors = {}
@@ -165,8 +165,8 @@ def transaction_list_view(request):
 
 
 def _check_budget(request, transaction):
-    # Match by the transaction's own date so budgets covering the expense date always apply,
-    # regardless of server timezone. SRS: one budget per category per overlapping period.
+                                                                                            
+                                                                                         
     budget = (
         Budget.objects.filter(
             user=request.user,
@@ -200,7 +200,7 @@ def _check_budget(request, transaction):
         messages.warning(request, f'You are close to your {transaction.category} budget limit.')
 
 
-# US3 - Budgets
+               
 @login_required
 def budget_list_view(request):
     budgets = Budget.objects.filter(user=request.user)
@@ -338,7 +338,7 @@ def recalculate_budget_view(request, budget_id):
     return redirect('budget_list')
 
 
-# US4 - Alerts
+              
 @login_required
 def alerts_view(request):
     today = timezone.localdate()
@@ -354,7 +354,7 @@ def alerts_view(request):
     })
 
 
-# US5 - Goals
+             
 @login_required
 def goals_view(request):
     goals  = SavingsGoal.objects.filter(user=request.user)
@@ -421,7 +421,7 @@ def contribute_to_goal_view(request, goal_id):
     })
 
 
-# US6 - Reports
+               
 @login_required
 def reports_view(request):
     today = timezone.localdate()
@@ -494,7 +494,7 @@ def reports_view(request):
     })
 
 
-# US7 - Dashboard
+                 
 @login_required
 def dashboard_view(request):
     today = timezone.localdate()
@@ -557,7 +557,7 @@ def dashboard_view(request):
     })
 
 
-# Subscriptions
+               
 @login_required
 def subscriptions_view(request):
     errors = {}

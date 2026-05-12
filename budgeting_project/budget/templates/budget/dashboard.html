@@ -2,14 +2,7 @@
 {% block title %}Dashboard – BudgetApp{% endblock %}
 
 {% block content %}
-<!--
-    ===============================================================
-    User Story #7 – Dashboard Overview
-    Developed by: زياد
-    Description : Home screen shows total balance, recent
-                  transactions, active budgets, and goal progress.
-    ===============================================================
--->
+
 
 <div class="page-header">
     <div>
@@ -22,7 +15,7 @@
     <a href="{% url 'add_transaction' %}" class="btn btn-primary">+ Add Transaction</a>
 </div>
 
-<!-- Budget Warnings (same row layout + style as Alerts notification history) -->
+
 {% for item in budget_warnings %}
 <div class="alert notif-history-alert {% if item.status == 'exceeded' %}alert-error{% else %}alert-warning{% endif %}">
     <span class="warning-triangle warning-triangle--inline" aria-hidden="true">&#9888;</span>
@@ -39,7 +32,7 @@
 </div>
 {% endfor %}
 
-<!-- Stat Cards (scale on mouse hover) -->
+
 <div class="stat-row">
     <div class="stat-card stat-balance">
         <div class="stat-icon-wrap icon-cyan">
@@ -81,12 +74,12 @@
     </div>
 </div>
 
-<!-- Main Grid -->
+
 <div class="row col-7-5">
 
-    <!-- Left column -->
+    
     <div>
-        <!-- Recent Transactions -->
+        
         <div class="card">
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
                 <span>Recent Transactions</span>
@@ -140,7 +133,7 @@
             </div>
         </div>
 
-        <!-- Active Budgets -->
+        
         <div class="card">
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
                 <span>Active Budgets</span>
@@ -201,7 +194,7 @@
         </div>
     </div>
 
-    <!-- Right column -->
+    
     <div>
         <div class="card">
             <div class="card-header">Spending Overview</div>
@@ -234,7 +227,7 @@
             </div>
         </div>
 
-        <!-- Goals -->
+        
         <div class="card">
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
                 <span>My Goals</span>
@@ -262,7 +255,7 @@
             </div>
         </div>
 
-        <!-- Notifications -->
+        
         <div class="card">
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
                 <span>Notifications {% if notifications %}<span class="badge badge-danger">{{ notifications.count }}</span>{% endif %}</span>

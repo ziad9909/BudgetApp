@@ -2,14 +2,7 @@
 {% block title %}Contribute to Goal – BudgetApp{% endblock %}
 
 {% block content %}
-<!--
-    ===============================================================
-    User Story #5 – Contribute to Savings Goal
-    Developed by: زياد
-    Description : Add money to an existing savings goal and
-                  watch the progress bar update.
-    ===============================================================
--->
+
 
 <div class="page-header">
     <div>
@@ -21,12 +14,12 @@
 
 <div class="content-medium">
 
-    <!-- Goal progress summary -->
+    
     <div class="card" style="margin-bottom:24px;">
         <div class="card-header">{{ goal.name }}</div>
         <div class="card-body">
 
-            <!-- Progress bar -->
+            
             <div class="progress-wrap" style="margin-bottom:8px;">
                 <div
                     class="progress-bar {% if goal.status == 'completed' %}progress-green{% else %}progress-blue{% endif %}"
@@ -47,7 +40,7 @@
         </div>
     </div>
 
-    <!-- Contribution form -->
+    
     <div class="card">
         <div class="card-header">Add Contribution</div>
         <div class="card-body">

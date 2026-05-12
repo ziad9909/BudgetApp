@@ -12,7 +12,7 @@
 
 <div class="sub-layout">
 
-    <!-- ── Left: Add form ── -->
+    
     <div>
         <div class="card card--overflow-visible">
             <div class="card-header">+ New Subscription</div>
@@ -61,14 +61,14 @@
         </div>
     </div>
 
-    <!-- ── Right: subscription cards ── -->
+    
     <div>
         {% if subscriptions %}
             <div class="sub-grid">
             {% for s in subscriptions %}
                 <div class="sub-card {% if s.is_due %}sub-card--due{% else %}sub-card--paid{% endif %}">
 
-                    <!-- top row: icon + name + status badge -->
+                    
                     <div class="sub-card__head">
                         <div class="sub-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -83,10 +83,10 @@
                         {% endif %}
                     </div>
 
-                    <!-- amount -->
+                    
                     <div class="sub-card__amount">{{ s.amount|floatformat:2 }} <span>EGP / month</span></div>
 
-                    <!-- meta row -->
+                    
                     <div class="sub-card__meta">
                         <span>Billing day: <strong>{{ s.billing_day }}</strong></span>
                         <span>Category: <strong>{{ s.category }}</strong></span>
@@ -95,7 +95,7 @@
                     <div class="sub-card__last-paid">Last paid: {{ s.last_paid }}</div>
                     {% endif %}
 
-                    <!-- actions -->
+                    
                     <div class="sub-card__actions">
                         {% if s.is_due %}
                         <form method="POST" action="{% url 'pay_subscription' s.id %}" style="flex:1;">
@@ -142,7 +142,7 @@
 
 </div>
 
-<!-- Page-scoped styles -->
+
 <style>
 .sub-layout {
     display: grid;

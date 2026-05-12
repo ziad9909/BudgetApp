@@ -2,14 +2,7 @@
 {% block title %}Add Transaction – BudgetApp{% endblock %}
 
 {% block content %}
-<!--
-    ===============================================================
-    User Story #2 – Add Transaction
-    Developed by: ملك
-    Description : A logged-in user records an income or expense
-                  (type, amount, category, date, payment, notes).
-    ===============================================================
--->
+
 
 <div class="page-header">
     <div>
@@ -29,7 +22,7 @@
 
                 <div class="form-row">
 
-                    <!-- Transaction Type (neo-select — same list style as Reports month) -->
+                    
                     <div class="form-group neo-select-wrap">
                         <label id="txn-type-label" for="transaction_type-trigger">Type</label>
                         <div class="neo-select" data-neo-select>
@@ -54,7 +47,7 @@
                         {% endif %}
                     </div>
 
-                    <!-- Amount -->
+                    
                     <div class="form-group">
                         <label for="amount">Amount (EGP)</label>
                         <input
@@ -76,7 +69,7 @@
 
                 <div class="form-row">
 
-                    <!-- Category -->
+                    
                     <div class="form-group">
                         <label for="category">Category</label>
                         <input
@@ -92,7 +85,7 @@
                         {% endif %}
                     </div>
 
-                    <!-- Date -->
+                    
                     <div class="form-group">
                         <label for="date">Date</label>
                         <input
@@ -109,7 +102,7 @@
 
                 </div>
 
-                <!-- Payment Method -->
+                
                 <div class="form-group neo-select-wrap">
                     <label id="pay-method-label" for="payment_method-trigger">Payment Method</label>
                     <div class="neo-select" data-neo-select>
@@ -133,7 +126,7 @@
                     </div>
                 </div>
 
-                <!-- Notes -->
+                
                 <div class="form-group">
                     <label for="notes">Notes (optional)</label>
                     <textarea

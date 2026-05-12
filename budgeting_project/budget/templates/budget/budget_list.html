@@ -2,14 +2,7 @@
 {% block title %}Budgets – BudgetApp{% endblock %}
 
 {% block content %}
-<!--
-    ===============================================================
-    User Story #3 – Budget List
-    Developed by: ملك
-    Description : Shows all budgets with a progress bar so the
-                  user can see how much of each budget was spent.
-    ===============================================================
--->
+
 
 <div class="page-header">
     <div>
@@ -35,7 +28,7 @@
             </div>
             <div class="card-body">
 
-                <!-- Spent / Limit amounts -->
+                
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                     <span style="font-size:0.875rem; color:#a8b3d6;">
                         Spent: <strong>{{ b.spent_amount }} EGP</strong>
@@ -45,7 +38,7 @@
                     </span>
                 </div>
 
-                <!-- Progress bar (data-width is read by the JS in base.html) -->
+                
                 <div class="progress-wrap" style="margin-bottom:8px;">
                     {% if b.check_limit == 'exceeded' %}
                         <div class="progress-bar progress-red"
@@ -79,7 +72,7 @@
     </div>
 
 {% else %}
-    <!-- No budgets yet -->
+    
     <div class="empty-state">
             <div style="font-size:2rem; color:#6f7da8;">—</div>
         <h3>No budgets yet</h3>

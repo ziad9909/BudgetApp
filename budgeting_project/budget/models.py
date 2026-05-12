@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from decimal import Decimal
 
 
-# stores every income or expense the user records
+                                                 
 class Transaction(models.Model):
 
     TYPE_CHOICES = [
@@ -33,14 +33,14 @@ class Transaction(models.Model):
         ordering = ['-date']
 
 
-# spending limit the user sets for a category
+                                             
 class Budget(models.Model):
 
     user            = models.ForeignKey(User, on_delete=models.CASCADE)
     category        = models.CharField(max_length=100)
     limit_amount    = models.DecimalField(max_digits=10, decimal_places=2)
     spent_amount    = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    alert_threshold = models.IntegerField(default=90)  # warn at this % of the limit
+    alert_threshold = models.IntegerField(default=90)                               
     start_date      = models.DateField()
     end_date        = models.DateField()
 
@@ -69,7 +69,7 @@ class Budget(models.Model):
         ordering = ['category']
 
 
-# a savings target the user wants to reach by a deadline
+                                                        
 class SavingsGoal(models.Model):
 
     STATUS_CHOICES = [
@@ -105,13 +105,13 @@ class SavingsGoal(models.Model):
         ordering = ['deadline']
 
 
-# monthly subscription the user pays on a recurring basis
+                                                         
 class Subscription(models.Model):
 
     user        = models.ForeignKey(User, on_delete=models.CASCADE)
     name        = models.CharField(max_length=200)
     amount      = models.DecimalField(max_digits=10, decimal_places=2)
-    billing_day = models.IntegerField(default=1)          # day-of-month (1-28)
+    billing_day = models.IntegerField(default=1)                               
     category    = models.CharField(max_length=100, default='Subscription')
     is_active   = models.BooleanField(default=True)
     last_paid   = models.DateField(null=True, blank=True)
@@ -132,7 +132,7 @@ class Subscription(models.Model):
         ordering = ['name']
 
 
-# notifications sent to the user (budget warnings, etc.)
+                                                        
 class Notification(models.Model):
 
     TYPE_CHOICES = [
