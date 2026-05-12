@@ -9,6 +9,11 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://budgetapp-production-8830.up.railway.app',
+    'https://*.up.railway.app',
+]
+
 
 # Application definition
 
