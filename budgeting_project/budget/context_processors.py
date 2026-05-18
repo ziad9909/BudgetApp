@@ -1,3 +1,4 @@
+from .gemini_config import is_gemini_configured
 from .models import UserProfile
 
 
@@ -9,4 +10,5 @@ def user_profile(request):
         'user_profile': profile,
         'user_display_name': profile.get_display_name(),
         'user_avatar_url': profile.avatar.url if profile.avatar else None,
+        'gemini_configured': is_gemini_configured(),
     }

@@ -13,6 +13,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from budget.data.categories import get_category_by_name, load_categories
+from budget.gemini_config import get_gemini_api_key, get_gemini_model
 
 
 class VoiceAIError(Exception):
@@ -192,7 +193,7 @@ def _normalize_transaction(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def _model_candidates() -> list[str]:
-    preferred = getattr(settings, "GEMINI_MODEL", "") or ""
+    preferred = get_gemini_model() or getattr(settings, "GEMINI_MODEL", "") or ""
     names: list[str] = []
     if preferred:
         names.append(preferred.strip())
@@ -256,7 +257,7 @@ def _gemini_config_hint() -> str:
 
 
 def _generate_with_fallback(contents: Any, max_tokens: int = 768) -> str:
-    api_key = (getattr(settings, "GEMINI_API_KEY", "") or "").strip()
+    api_key = get_gemini_api_key()
     if not api_key:
         raise VoiceAIError(_gemini_config_hint())
 

@@ -20,6 +20,7 @@ from .data.categories import (
     get_category_lookup,
     validate_category_for_type,
 )
+from .gemini_config import is_gemini_configured
 from .services.voice_ai import VoiceAIError, analyze_audio, analyze_text
 
                                                                                                      
@@ -596,7 +597,7 @@ def dashboard_view(request):
     ]
 
     return render(request, 'budget/dashboard.html', {
-        'gemini_configured': bool(getattr(settings, 'GEMINI_API_KEY', '')),
+        'gemini_configured': is_gemini_configured(),
         'total_balance': total_balance,
         'monthly_income': monthly_income,
         'monthly_expenses': monthly_expenses,
