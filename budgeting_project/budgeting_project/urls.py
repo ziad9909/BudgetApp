@@ -17,10 +17,19 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import path, include
+from django.views.generic import RedirectView
+
+
+def robots_txt(request):
+    return HttpResponse('User-agent: *\nDisallow:\n', content_type='text/plain')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('favicon.ico', RedirectView.as_view(url='/static/favicon.svg', permanent=True)),
+    path('robots.txt', robots_txt),
     path('', include('budget.urls')),
 ]
 

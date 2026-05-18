@@ -13,19 +13,61 @@ if _env_path.exists():
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure--@1y&=f8!lwe6#^lm%rpcuiv2_%ufkx-%d-+-vl)byvzo#@4x$')
 
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+_ON_RAILWAY = bool(
+    os.environ.get('RAILWAY_ENVIRONMENT')
+    or os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    or os.environ.get('RAILWAY_PROJECT_ID')
+)
+_ON_PAAS = _ON_RAILWAY or bool(os.environ.get('PORT'))
+
+# Default DEBUG off on Railway/PaaS unless explicitly enabled.
+_debug_default = 'False' if _ON_PAAS else 'True'
+DEBUG = os.environ.get('DEBUG', _debug_default) == 'True'
 
 ALLOWED_HOSTS = ['*']
 
-_csrf_trusted = os.environ.get('CSRF_TRUSTED_ORIGINS', '').strip()
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_trusted.split(',') if o.strip()]
 
-# Railway sets RAILWAY_PUBLIC_DOMAIN (e.g. app.up.railway.app); trust it for CSRF when the env list is empty or incomplete.
-_railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', '').strip()
-if _railway_domain:
-    _railway_origin = f'https://{_railway_domain}'
-    if _railway_origin not in CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS = [*CSRF_TRUSTED_ORIGINS, _railway_origin]
+def _https_origin(value: str) -> str:
+    value = (value or '').strip().rstrip('/')
+    if not value:
+        return ''
+    if value.startswith('http://'):
+        return 'https://' + value[7:]
+    if value.startswith('https://'):
+        return value
+    return f'https://{value}'
+
+
+def _build_csrf_trusted_origins() -> list[str]:
+    origins: list[str] = []
+    for part in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(','):
+        origin = _https_origin(part)
+        if origin and origin not in origins:
+            origins.append(origin)
+    for env_name in (
+        'RAILWAY_PUBLIC_DOMAIN',
+        'RAILWAY_STATIC_URL',
+        'PUBLIC_URL',
+        'WEB_URL',
+        'APP_URL',
+    ):
+        origin = _https_origin(os.environ.get(env_name, ''))
+        if origin and origin not in origins:
+            origins.append(origin)
+    return origins
+
+
+CSRF_TRUSTED_ORIGINS = _build_csrf_trusted_origins()
+
+if _ON_PAAS:
+    # Railway terminates TLS at the edge; gunicorn sees HTTP without this header.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    USE_X_FORWARDED_HOST = True
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    if not DEBUG:
+        CSRF_COOKIE_SECURE = True
+        SESSION_COOKIE_SECURE = True
 
 
 INSTALLED_APPS = [

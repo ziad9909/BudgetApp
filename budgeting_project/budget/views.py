@@ -5,6 +5,7 @@ from django.db import models
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -43,6 +44,7 @@ def _budget_period_overlaps(user, category, start_date, end_date, exclude_pk=Non
 
 
                
+@ensure_csrf_cookie
 def signup_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -82,6 +84,7 @@ def signup_view(request):
     return render(request, 'budget/signup.html', {'errors': errors, 'old': request.POST})
 
 
+@ensure_csrf_cookie
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
