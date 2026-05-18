@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
@@ -237,10 +238,27 @@ def _gemini_error_message(exc: Exception) -> str:
     return f"Gemini error: {msg[:200]}"
 
 
+def _gemini_config_hint() -> str:
+    on_railway = bool(
+        os.environ.get("RAILWAY_ENVIRONMENT")
+        or os.environ.get("RAILWAY_PUBLIC_DOMAIN")
+    )
+    if on_railway:
+        return (
+            "GEMINI_API_KEY is not set. In Railway → your service → Variables, "
+            "add GEMINI_API_KEY with your key from https://aistudio.google.com/apikey "
+            "then redeploy."
+        )
+    return (
+        "GEMINI_API_KEY is not set. Add it to budgeting_project/.env "
+        "(see .env.example), then restart the server."
+    )
+
+
 def _generate_with_fallback(contents: Any, max_tokens: int = 768) -> str:
-    api_key = getattr(settings, "GEMINI_API_KEY", "") or ""
+    api_key = (getattr(settings, "GEMINI_API_KEY", "") or "").strip()
     if not api_key:
-        raise VoiceAIError("GEMINI_API_KEY is not configured. Add it to your .env file.")
+        raise VoiceAIError(_gemini_config_hint())
 
     try:
         import google.generativeai as genai

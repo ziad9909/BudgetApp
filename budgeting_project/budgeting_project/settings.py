@@ -155,5 +155,19 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
-GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash')
+def _env(key: str, default: str = '') -> str:
+    return (os.environ.get(key, default) or '').strip()
+
+
+_GEMINI_PLACEHOLDERS = frozenset({
+    '',
+    'your_gemini_api_key_here',
+    'your-api-key',
+    'changeme',
+})
+
+GEMINI_API_KEY = _env('GEMINI_API_KEY')
+if GEMINI_API_KEY.lower() in _GEMINI_PLACEHOLDERS:
+    GEMINI_API_KEY = ''
+
+GEMINI_MODEL = _env('GEMINI_MODEL') or 'gemini-2.5-flash'

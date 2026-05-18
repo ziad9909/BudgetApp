@@ -16,6 +16,7 @@
 </div>
 
 
+{% if gemini_configured %}
 <div class="card voice-card" id="voice-card">
     <div class="card-body voice-card-body">
         <div class="voice-card-left">
@@ -79,6 +80,14 @@
         </div>
     </div>
 </div>
+{% else %}
+<div class="info-box">
+    <strong>AI Voice is off:</strong> Set <code>GEMINI_API_KEY</code> in your
+    <code>.env</code> file locally, or in <strong>Railway → Variables</strong> when deployed.
+    Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>,
+    then restart or redeploy.
+</div>
+{% endif %}
 
 {% for item in budget_warnings %}
 <div class="alert notif-history-alert {% if item.status == 'exceeded' %}alert-error{% else %}alert-warning{% endif %}">

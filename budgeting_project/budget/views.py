@@ -596,6 +596,7 @@ def dashboard_view(request):
     ]
 
     return render(request, 'budget/dashboard.html', {
+        'gemini_configured': bool(getattr(settings, 'GEMINI_API_KEY', '')),
         'total_balance': total_balance,
         'monthly_income': monthly_income,
         'monthly_expenses': monthly_expenses,
