@@ -1,0 +1,435 @@
+{% extends 'budget/base.html' %}
+{% block title %}Profile – SmartFinance{% endblock %}
+
+{% block content %}
+
+<div class="page-header profile-page-header">
+    <div>
+        <h2>Profile</h2>
+        <p>Manage your account details and how SmartFinance shows you in the app.</p>
+    </div>
+</div>
+
+<div class="profile-layout">
+
+    <aside class="profile-summary card">
+        <div class="profile-summary__avatar-wrap">
+            {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="" class="profile-summary__avatar" id="summary-avatar-img">
+            {% else %}
+            <div class="profile-summary__avatar profile-summary__avatar--initials" id="summary-avatar-initials">
+                {{ profile.get_display_name|slice:":1"|upper }}
+            </div>
+            {% endif %}
+        </div>
+        <h3 class="profile-summary__name">{{ profile.get_display_name }}</h3>
+        <p class="profile-summary__email">{{ user.email|default:"No email set" }}</p>
+
+        <ul class="profile-stats">
+            <li class="profile-stat">
+                <span class="profile-stat__value">{{ profile_stats.expense_count }}</span>
+                <span class="profile-stat__label">Expenses</span>
+            </li>
+            <li class="profile-stat">
+                <span class="profile-stat__value">{{ profile_stats.income_count }}</span>
+                <span class="profile-stat__label">Income entries</span>
+            </li>
+            <li class="profile-stat">
+                <span class="profile-stat__value">{{ profile_stats.budget_count }}</span>
+                <span class="profile-stat__label">Budgets</span>
+            </li>
+        </ul>
+    </aside>
+
+    <div class="card profile-settings-card">
+        <div class="profile-settings-card__head">
+            <span class="profile-settings-card__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </span>
+            <div>
+                <h3 class="profile-settings-card__title">Account settings</h3>
+                <p class="profile-settings-card__sub">Update your personal details and choose a profile image for the sidebar.</p>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <form method="POST" action="{% url 'profile' %}" enctype="multipart/form-data" id="profile-form">
+                {% csrf_token %}
+
+                <div class="profile-avatar-upload">
+                    <div class="profile-avatar-upload__preview-wrap">
+                        {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="" class="profile-avatar-upload__preview" id="avatar-preview">
+                        {% else %}
+                        <div class="profile-avatar-upload__preview profile-avatar-upload__preview--initials" id="avatar-preview">
+                            {{ profile.get_display_name|slice:":1"|upper }}
+                        </div>
+                        {% endif %}
+                        {% if profile.avatar %}
+                        <button type="submit" name="remove_avatar" value="1" class="profile-avatar-upload__remove"
+                                title="Remove photo" formaction="{% url 'profile' %}">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="profile-avatar-upload__actions">
+                        <label class="btn btn-primary profile-upload-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Upload avatar
+                            <input type="file" name="avatar" id="avatar-input" accept="image/*" hidden>
+                        </label>
+                        <span class="profile-avatar-upload__hint">JPG or PNG, max 2 MB</span>
+                        {% if errors.avatar %}<div class="form-error">{{ errors.avatar }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="display_name">Display name</label>
+                        <input type="text" id="display_name" name="display_name" class="form-control"
+                               placeholder="How you appear in the app"
+                               value="{{ profile.display_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" class="form-control"
+                               value="{{ user.username }}" required>
+                        {% if errors.username %}<div class="form-error">{{ errors.username }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control"
+                           value="{{ user.email }}" required>
+                    {% if errors.email %}<div class="form-error">{{ errors.email }}</div>{% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">Phone <span class="label-optional">(optional)</span></label>
+                        <input type="text" id="phone" name="phone" class="form-control"
+                               placeholder="+20 …" value="{{ profile.phone }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="preferred_currency">Currency</label>
+                        <input type="text" id="preferred_currency" name="preferred_currency" class="form-control"
+                               maxlength="10" value="{{ profile.preferred_currency }}">
+                    </div>
+                </div>
+
+                <div class="form-group profile-password-group">
+                    <label for="current_password">
+                        <svg class="profile-field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        Current password
+                    </label>
+                    <input type="password" id="current_password" name="current_password" class="form-control"
+                           placeholder="Required only when changing email" autocomplete="current-password">
+                    {% if errors.current_password %}<div class="form-error">{{ errors.current_password }}</div>{% endif %}
+                </div>
+
+                <div class="profile-form-footer">
+                    <button type="submit" class="btn btn-primary profile-save-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Save profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<style>
+.profile-page-header p {
+    max-width: 520px;
+    color: #8f9bc4;
+}
+
+.profile-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 300px) 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ── Summary card (left) ── */
+.profile-summary {
+    padding: 28px 24px 24px;
+    text-align: center;
+    position: sticky;
+    top: 24px;
+}
+.profile-summary__avatar-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+.profile-summary__avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(139, 92, 246, 0.45);
+    box-shadow: 0 8px 28px rgba(139, 92, 246, 0.25);
+}
+.profile-summary__avatar--initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(145deg, #8b5cf6 0%, #7c3aed 55%, #22d3ee 100%);
+}
+.profile-summary__name {
+    margin: 0 0 6px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #e6ecff;
+}
+.profile-summary__email {
+    margin: 0 0 24px;
+    font-size: 0.85rem;
+    color: #8f9bc4;
+    word-break: break-all;
+}
+
+.profile-stats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid rgba(136, 165, 255, 0.12);
+}
+.profile-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 4px;
+    border-bottom: 1px solid rgba(136, 165, 255, 0.08);
+}
+.profile-stat:last-child { border-bottom: none; }
+.profile-stat__value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #a78bfa;
+    min-width: 2.5rem;
+    text-align: left;
+}
+.profile-stat__label {
+    font-size: 0.88rem;
+    color: #a8b3d6;
+    text-align: right;
+    flex: 1;
+}
+
+/* ── Settings card (right) ── */
+.profile-settings-card__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 22px 24px 0;
+}
+.profile-settings-card__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #c4b5fd;
+    background: rgba(139, 92, 246, 0.18);
+    border: 1px solid rgba(167, 139, 250, 0.35);
+}
+.profile-settings-card__title {
+    margin: 0 0 4px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e6ecff;
+}
+.profile-settings-card__sub {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #8f9bc4;
+    line-height: 1.45;
+}
+.profile-settings-card .card-body {
+    padding: 20px 24px 28px;
+}
+
+.profile-avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px;
+    margin-bottom: 24px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(136, 165, 255, 0.12);
+}
+.profile-avatar-upload__preview-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+.profile-avatar-upload__preview {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(139, 92, 246, 0.4);
+}
+.profile-avatar-upload__preview--initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(145deg, #8b5cf6 0%, #7c3aed 100%);
+}
+.profile-avatar-upload__remove {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 77, 130, 0.9);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: transform 0.15s;
+}
+.profile-avatar-upload__remove:hover { transform: scale(1.08); }
+.profile-avatar-upload__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.profile-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    width: fit-content;
+}
+.profile-avatar-upload__hint {
+    font-size: 0.74rem;
+    color: #6f7da8;
+}
+
+.label-optional {
+    font-weight: 400;
+    color: #6f7da8;
+    font-size: 0.78rem;
+}
+
+.profile-password-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.profile-field-icon {
+    color: #a78bfa;
+    flex-shrink: 0;
+}
+
+.profile-form-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    padding-top: 8px;
+}
+.profile-save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+}
+
+@media (max-width: 900px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+    .profile-summary {
+        position: static;
+    }
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        border-top: none;
+    }
+    .profile-stat {
+        flex-direction: column;
+        text-align: center;
+        border-bottom: none;
+        border-right: 1px solid rgba(136, 165, 255, 0.08);
+        padding: 12px 8px;
+    }
+    .profile-stat:last-child { border-right: none; }
+    .profile-stat__value { text-align: center; }
+    .profile-stat__label { text-align: center; }
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function () {
+    var input = document.getElementById('avatar-input');
+    var preview = document.getElementById('avatar-preview');
+    var summaryImg = document.getElementById('summary-avatar-img');
+    var summaryInitials = document.getElementById('summary-avatar-initials');
+    if (!input) return;
+
+    input.addEventListener('change', function () {
+        var file = input.files && input.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        var url = URL.createObjectURL(file);
+        if (preview) {
+            if (preview.tagName === 'IMG') {
+                preview.src = url;
+            } else {
+                var img = document.createElement('img');
+                img.id = 'avatar-preview';
+                img.className = 'profile-avatar-upload__preview';
+                img.src = url;
+                img.alt = '';
+                preview.replaceWith(img);
+            }
+        }
+        if (summaryImg) {
+            summaryImg.src = url;
+        } else if (summaryInitials) {
+            var sImg = document.createElement('img');
+            sImg.id = 'summary-avatar-img';
+            sImg.className = 'profile-summary__avatar';
+            sImg.src = url;
+            sImg.alt = '';
+            summaryInitials.replaceWith(sImg);
+        }
+    });
+})();
+</script>
+{% endblock %}

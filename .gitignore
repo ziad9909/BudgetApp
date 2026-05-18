@@ -1,0 +1,8 @@
+.env
+*.pyc
+__pycache__/
+budgeting_project/db.sqlite3
+budgeting_project/media/
+budgeting_project/staticfiles/
+.venv/
+venv/

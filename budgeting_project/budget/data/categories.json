@@ -1,0 +1,149 @@
+[
+  {
+    "id": "exp_food_dining",
+    "name": "Food & Dining",
+    "icon": "restaurant",
+    "color": "#FF6B6B",
+    "type": "expense"
+  },
+  {
+    "id": "exp_groceries",
+    "name": "Groceries",
+    "icon": "shopping_cart",
+    "color": "#4ECDC4",
+    "type": "expense"
+  },
+  {
+    "id": "exp_transport",
+    "name": "Transportation",
+    "icon": "directions_car",
+    "color": "#45B7D1",
+    "type": "expense"
+  },
+  {
+    "id": "exp_housing_rent",
+    "name": "Housing & Rent",
+    "icon": "home",
+    "color": "#9B59B6",
+    "type": "expense"
+  },
+  {
+    "id": "exp_bills_utilities",
+    "name": "Bills & Utilities",
+    "icon": "bolt",
+    "color": "#F39C12",
+    "type": "expense"
+  },
+  {
+    "id": "exp_healthcare",
+    "name": "Healthcare",
+    "icon": "medical_services",
+    "color": "#E74C3C",
+    "type": "expense"
+  },
+  {
+    "id": "exp_shopping",
+    "name": "Shopping",
+    "icon": "shopping_bag",
+    "color": "#FF9FF3",
+    "type": "expense"
+  },
+  {
+    "id": "exp_entertainment",
+    "name": "Entertainment",
+    "icon": "movie",
+    "color": "#FD79A8",
+    "type": "expense"
+  },
+  {
+    "id": "exp_education",
+    "name": "Education",
+    "icon": "school",
+    "color": "#6C5CE7",
+    "type": "expense"
+  },
+  {
+    "id": "exp_fitness",
+    "name": "Fitness",
+    "icon": "fitness_center",
+    "color": "#27AE60",
+    "type": "expense"
+  },
+  {
+    "id": "exp_subscriptions",
+    "name": "Subscriptions",
+    "icon": "subscriptions",
+    "color": "#A29BFE",
+    "type": "expense"
+  },
+  {
+    "id": "exp_travel",
+    "name": "Travel",
+    "icon": "flight",
+    "color": "#00B894",
+    "type": "expense"
+  },
+  {
+    "id": "exp_other",
+    "name": "Other Expense",
+    "icon": "more_horiz",
+    "color": "#95A5A6",
+    "type": "expense"
+  },
+  {
+    "id": "inc_salary",
+    "name": "Salary",
+    "icon": "payments",
+    "color": "#2ECC71",
+    "type": "income"
+  },
+  {
+    "id": "inc_freelance",
+    "name": "Freelance",
+    "icon": "laptop_mac",
+    "color": "#1ABC9C",
+    "type": "income"
+  },
+  {
+    "id": "inc_business",
+    "name": "Business Income",
+    "icon": "storefront",
+    "color": "#16A085",
+    "type": "income"
+  },
+  {
+    "id": "inc_side_hustle",
+    "name": "Side Hustle",
+    "icon": "trending_up",
+    "color": "#00B894",
+    "type": "income"
+  },
+  {
+    "id": "inc_investments",
+    "name": "Investments",
+    "icon": "show_chart",
+    "color": "#3498DB",
+    "type": "income"
+  },
+  {
+    "id": "inc_bonuses",
+    "name": "Bonuses",
+    "icon": "emoji_events",
+    "color": "#F1C40F",
+    "type": "income"
+  },
+  {
+    "id": "inc_gifts",
+    "name": "Gifts",
+    "icon": "redeem",
+    "color": "#E67E22",
+    "type": "income"
+  },
+  {
+    "id": "inc_other",
+    "name": "Other Income",
+    "icon": "attach_money",
+    "color": "#95A5A6",
+    "type": "income"
+  }
+]

@@ -74,7 +74,7 @@
 {% else %}
     
     <div class="empty-state">
-            <div style="font-size:2rem; color:#6f7da8;">—</div>
+        <span class="empty-state-mark" aria-hidden="true"></span>
         <h3>No budgets yet</h3>
         <p>Create your first budget to start tracking your spending limits.</p>
         <a href="{% url 'create_budget' %}" class="btn btn-primary">+ Create Budget</a>

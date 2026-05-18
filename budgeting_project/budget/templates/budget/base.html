@@ -126,13 +126,41 @@
             padding: 16px 20px;
             border-top: 1px solid rgba(51, 65, 85, 0.35);
         }
+        .sidebar-user-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            text-decoration: none;
+            min-width: 0;
+        }
+        .sidebar-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+        .sidebar-user-avatar--initials {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(145deg, #8b5cf6 0%, #7c3aed 100%);
+        }
         .sidebar-user-name {
             color: #8f9bc4;
             font-size: 0.76rem;
-            margin-bottom: 10px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            transition: color 0.15s;
+        }
+        .sidebar-user-link:hover .sidebar-user-name {
+            color: #c4b5fd;
         }
         .sidebar-signout {
             display: flex;
@@ -580,8 +608,14 @@
 
         /* Custom dropdown (e.g. month picker) — full control over panel radius + colors */
         .neo-select-wrap { position: relative; z-index: 1; }
+        .neo-select-wrap:has(.neo-select.is-open),
+        .neo-select-wrap.is-open-wrap { z-index: 1000; }
         .neo-select { position: relative; }
         .neo-select.is-open { z-index: 400; }
+        .neo-select-wrap--category { margin-bottom: 4px; }
+        #category-select .neo-select-panel {
+            max-height: 220px;
+        }
         .neo-select-trigger {
             width: 100%;
             display: flex;
@@ -724,6 +758,18 @@
         .category-name {
             color: #eef4ff;
             text-shadow: 0 0 8px rgba(214, 227, 255, 0.22);
+        }
+        .category-option-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+        }
+        .neo-select-option.category-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .category-icon-rent {
             stroke: #67e8f9;
@@ -1009,11 +1055,144 @@
         /* ── Empty state ── */
         .empty-state {
             text-align: center;
-            padding: 48px 20px;
+            padding: 56px 28px;
             color: #a8b3d6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .empty-state-mark {
+            width: 44px;
+            height: 4px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+            margin-bottom: 22px;
+            flex-shrink: 0;
+        }
+        .empty-state h3,
+        .empty-state h5,
+        .empty-state-title {
+            color: #e6ecff;
+            font-size: 1.12rem;
+            font-weight: 700;
+            margin: 0 0 12px;
+            line-height: 1.3;
+        }
+        .empty-state p,
+        .empty-state-text {
+            color: #8f9bc4;
+            font-size: 0.9rem;
+            line-height: 1.55;
+            max-width: 380px;
+            margin: 0 0 26px;
+        }
+        .empty-state .btn {
+            margin-top: 0;
+        }
+        .empty-state--compact {
+            padding: 28px 18px;
+        }
+        .empty-state--compact .empty-state-mark {
+            margin-bottom: 14px;
+        }
+        .empty-state--compact p,
+        .empty-state--compact .empty-state-text {
+            margin-bottom: 14px;
+            font-size: 0.85rem;
         }
         .empty-state .icon { font-size: 3.5rem; margin-bottom: 16px; }
-        .empty-state h5 { color: #e6ecff; margin-bottom: 8px; font-size: 1rem; }
+
+        /* ── AI Voice recorder (dashboard) ── */
+        .voice-card { margin-bottom: 24px; border-color: rgba(139, 92, 246, 0.28); }
+        .voice-card-body {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 22px 24px !important;
+        }
+        .voice-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(167, 139, 250, 0.45);
+            color: #c4b5fd;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .voice-title { font-size: 1.1rem; font-weight: 700; color: #f3f0ff; margin-bottom: 6px; }
+        .voice-subtitle { font-size: 0.86rem; color: #8f98bc; margin-bottom: 8px; max-width: 480px; }
+        .voice-status { font-size: 0.82rem; color: #a78bfa; font-weight: 500; }
+        .voice-status.is-recording { color: #f472b6; }
+        .voice-status.is-processing { color: #67e8f9; }
+        .voice-mic-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #8b5cf6 0%, #7c3aed 100%);
+            color: #fff;
+            box-shadow: 0 8px 28px rgba(139, 92, 246, 0.45);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .voice-mic-btn svg { width: 28px; height: 28px; }
+        .voice-mic-btn:hover { transform: scale(1.04); box-shadow: 0 10px 32px rgba(139, 92, 246, 0.55); }
+        .voice-mic-btn.is-recording {
+            background: linear-gradient(145deg, #ec4899 0%, #db2777 100%);
+            animation: voice-pulse 1.2s ease-in-out infinite;
+        }
+        @keyframes voice-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.45); }
+            50% { box-shadow: 0 0 0 14px rgba(236, 72, 153, 0); }
+        }
+        .voice-card-actions { display: flex; align-items: center; gap: 12px; }
+        .voice-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .voice-modal[hidden] { display: none !important; }
+        .voice-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(4, 8, 20, 0.72);
+            backdrop-filter: blur(4px);
+        }
+        .voice-modal-panel {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(139, 92, 246, 0.35);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+        }
+        .voice-modal-panel h3 { color: #f3f0ff; margin-bottom: 12px; font-size: 1.2rem; }
+        .voice-modal-transcript {
+            font-size: 0.88rem;
+            color: #a78bfa;
+            font-style: italic;
+            margin-bottom: 18px;
+            padding: 10px 12px;
+            background: rgba(139, 92, 246, 0.08);
+            border-radius: 8px;
+            border-left: 3px solid #8b5cf6;
+        }
+        .voice-preview-form { margin-bottom: 12px; }
+        .voice-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
 
         /* ── Info box ── */
          .info-box {
@@ -1259,6 +1438,15 @@
             Alerts
         </a>
 
+        <a href="{% url 'profile' %}"
+           class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Profile
+        </a>
+
         <a href="{% url 'subscriptions' %}"
            class="nav-item {% if request.resolver_match.url_name == 'subscriptions' or request.resolver_match.url_name == 'pay_subscription' %}active{% endif %}">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1270,7 +1458,14 @@
 
     
     <div class="sidebar-footer">
-        <div class="sidebar-user-name">{{ user.email|default:user.username }}</div>
+        <a href="{% url 'profile' %}" class="sidebar-user-link">
+            {% if user_avatar_url %}
+            <img src="{{ user_avatar_url }}" alt="" class="sidebar-user-avatar">
+            {% else %}
+            <span class="sidebar-user-avatar sidebar-user-avatar--initials">{{ user_display_name|slice:":1"|upper }}</span>
+            {% endif %}
+            <span class="sidebar-user-name">{{ user_display_name }}</span>
+        </a>
         <a href="{% url 'logout' %}" class="sidebar-signout">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -1330,6 +1525,8 @@
     function closeNeo(root) {
         if (!root) return;
         root.classList.remove('is-open');
+        var wrap = root.closest('.neo-select-wrap');
+        if (wrap) wrap.classList.remove('is-open-wrap');
         var panel = root.querySelector('.neo-select-panel');
         var trigger = root.querySelector('.neo-select-trigger');
         if (panel) panel.setAttribute('hidden', '');
@@ -1340,6 +1537,8 @@
             if (other !== root) closeNeo(other);
         });
         root.classList.add('is-open');
+        var wrap = root.closest('.neo-select-wrap');
+        if (wrap) wrap.classList.add('is-open-wrap');
         var panel = root.querySelector('.neo-select-panel');
         var trigger = root.querySelector('.neo-select-trigger');
         if (panel) panel.removeAttribute('hidden');

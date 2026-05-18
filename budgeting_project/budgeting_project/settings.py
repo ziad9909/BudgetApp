@@ -3,6 +3,14 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+_env_path = BASE_DIR / '.env'
+if _env_path.exists():
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(_env_path)
+    except ImportError:
+        pass
+
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure--@1y&=f8!lwe6#^lm%rpcuiv2_%ufkx-%d-+-vl)byvzo#@4x$')
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
@@ -54,6 +62,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'budget.context_processors.user_profile',
             ],
         },
     },
@@ -99,4 +108,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash')

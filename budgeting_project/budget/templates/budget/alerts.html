@@ -51,8 +51,10 @@
 
         {% else %}
             <div class="empty-state">
-                <p>No active budgets right now. Create one first!</p>
-                <a href="{% url 'create_budget' %}" class="btn btn-primary">Create Budget</a>
+                <span class="empty-state-mark" aria-hidden="true"></span>
+                <h3>No active budgets</h3>
+                <p>Create a budget to start receiving spending alerts.</p>
+                <a href="{% url 'create_budget' %}" class="btn btn-primary">+ Create Budget</a>
             </div>
         {% endif %}
 

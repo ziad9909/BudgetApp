@@ -16,6 +16,70 @@
 </div>
 
 
+<div class="card voice-card" id="voice-card">
+    <div class="card-body voice-card-body">
+        <div class="voice-card-left">
+            <span class="voice-badge">AI Voice</span>
+            <h3 class="voice-title">Record a transaction</h3>
+            <p class="voice-subtitle">Say something like: &ldquo;I paid 250 EGP for food at McDonald&rsquo;s today&rdquo;</p>
+            <p class="voice-status" id="voice-status">Tap the mic to start</p>
+        </div>
+        <div class="voice-card-actions">
+            <button type="button" class="voice-mic-btn" id="voice-mic-btn" aria-label="Record voice transaction">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" id="voice-stop-btn" hidden>Stop</button>
+        </div>
+    </div>
+</div>
+
+<div class="voice-modal" id="voice-modal" hidden>
+    <div class="voice-modal-backdrop" id="voice-modal-backdrop"></div>
+    <div class="voice-modal-panel" role="dialog" aria-labelledby="voice-modal-title">
+        <h3 id="voice-modal-title">Confirm transaction</h3>
+        <p class="voice-modal-transcript" id="voice-modal-transcript"></p>
+        <form id="voice-preview-form" class="voice-preview-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="voice-type">Type</label>
+                    <select id="voice-type" class="form-control" name="type">
+                        <option value="expense">Expense</option>
+                        <option value="income">Income</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="voice-amount">Amount (EGP)</label>
+                    <input type="number" id="voice-amount" class="form-control" step="0.01" min="0.01" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="voice-category">Category</label>
+                    <input type="text" id="voice-category" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="voice-date">Date</label>
+                    <input type="date" id="voice-date" class="form-control" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="voice-description">Description</label>
+                <input type="text" id="voice-description" class="form-control">
+            </div>
+        </form>
+        <p class="voice-modal-error form-error" id="voice-modal-error" hidden></p>
+        <div class="voice-modal-actions">
+            <button type="button" class="btn btn-outline" id="voice-cancel-btn">Cancel</button>
+            <button type="button" class="btn btn-primary" id="voice-save-btn">Save transaction</button>
+        </div>
+    </div>
+</div>
+
 {% for item in budget_warnings %}
 <div class="alert notif-history-alert {% if item.status == 'exceeded' %}alert-error{% else %}alert-warning{% endif %}">
     <span class="warning-triangle warning-triangle--inline" aria-hidden="true">&#9888;</span>
@@ -126,8 +190,10 @@
                     </tbody>
                 </table>
                 {% else %}
-                <div class="empty-state">
+                <div class="empty-state empty-state--compact">
+                    <span class="empty-state-mark" aria-hidden="true"></span>
                     <h5>No transactions yet</h5>
+                    <p><a href="{% url 'add_transaction' %}" style="color:#c4b5fd;">Add your first transaction</a></p>
                 </div>
                 {% endif %}
             </div>
@@ -186,8 +252,10 @@
                     </div>
                     {% endfor %}
                 {% else %}
-                <div class="empty-state">
-                    <p>No active budgets. <a href="{% url 'create_budget' %}" style="color:#67e8f9;">Create one</a>.</p>
+                <div class="empty-state empty-state--compact">
+                    <span class="empty-state-mark" aria-hidden="true"></span>
+                    <h5>No active budgets</h5>
+                    <p><a href="{% url 'create_budget' %}" style="color:#c4b5fd;">Create a budget</a></p>
                 </div>
                 {% endif %}
             </div>
@@ -219,9 +287,10 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="empty-state" style="padding:22px 14px;">
+                <div class="empty-state empty-state--compact">
+                    <span class="empty-state-mark" aria-hidden="true"></span>
                     <h5>No expenses this month</h5>
-                    <p class="text-muted">Add expense transactions to see spending analysis.</p>
+                    <p>Add expense transactions to see spending analysis.</p>
                 </div>
                 {% endif %}
             </div>
@@ -248,8 +317,10 @@
                     </div>
                     {% endfor %}
                 {% else %}
-                <div class="empty-state">
-                    <p>No goals. <a href="{% url 'goals' %}" style="color:#67e8f9;">Set a goal</a>.</p>
+                <div class="empty-state empty-state--compact">
+                    <span class="empty-state-mark" aria-hidden="true"></span>
+                    <h5>No goals yet</h5>
+                    <p><a href="{% url 'goals' %}" style="color:#c4b5fd;">Set a savings goal</a></p>
                 </div>
                 {% endif %}
             </div>
@@ -274,8 +345,10 @@
                     {% endfor %}
                 </ul>
                 {% else %}
-                <div class="empty-state">
-                    <p>No new notifications.</p>
+                <div class="empty-state empty-state--compact">
+                    <span class="empty-state-mark" aria-hidden="true"></span>
+                    <h5>No new notifications</h5>
+                    <p>You're all caught up.</p>
                 </div>
                 {% endif %}
             </div>
@@ -333,6 +406,164 @@
             }
         });
     })();
+</script>
+<script>
+(function () {
+    var micBtn = document.getElementById('voice-mic-btn');
+    var stopBtn = document.getElementById('voice-stop-btn');
+    var statusEl = document.getElementById('voice-status');
+    var modal = document.getElementById('voice-modal');
+    var backdrop = document.getElementById('voice-modal-backdrop');
+    var cancelBtn = document.getElementById('voice-cancel-btn');
+    var saveBtn = document.getElementById('voice-save-btn');
+    var errorEl = document.getElementById('voice-modal-error');
+    var transcriptEl = document.getElementById('voice-modal-transcript');
+
+    if (!micBtn || !modal) return;
+
+    var mediaRecorder = null;
+    var audioChunks = [];
+    var isRecording = false;
+    var recordStartedAt = 0;
+
+    function getCookie(name) {
+        var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? decodeURIComponent(match[2]) : '';
+    }
+
+    function setStatus(text, className) {
+        statusEl.textContent = text;
+        statusEl.className = 'voice-status' + (className ? ' ' + className : '');
+    }
+
+    function openModal() {
+        modal.removeAttribute('hidden');
+        errorEl.hidden = true;
+    }
+
+    function closeModal() {
+        modal.setAttribute('hidden', '');
+    }
+
+    function fillPreview(txn, transcript) {
+        document.getElementById('voice-type').value = txn.type || 'expense';
+        document.getElementById('voice-amount').value = txn.amount || '';
+        document.getElementById('voice-category').value = txn.category || '';
+        document.getElementById('voice-date').value = txn.date || '';
+        document.getElementById('voice-description').value = txn.description || '';
+        transcriptEl.textContent = transcript ? ('Heard: “' + transcript + '”') : '';
+    }
+
+    async function uploadAudio(blob) {
+        if (!blob || blob.size < 500) {
+            throw new Error('Recording too short. Hold the mic and speak for at least 2 seconds.');
+        }
+        setStatus('Analyzing with AI…', 'is-processing');
+        var form = new FormData();
+        form.append('audio', blob, 'voice.webm');
+        var res = await fetch('{% url "voice_transaction_api" %}', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: form,
+            credentials: 'same-origin'
+        });
+        var data = await res.json();
+        if (!res.ok || !data.success) {
+            throw new Error(data.error || 'Could not analyze voice.');
+        }
+        fillPreview(data.transaction, data.transcript);
+        openModal();
+        setStatus('Tap the mic to start', '');
+    }
+
+    async function startRecording() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            setStatus('Microphone not supported in this browser.', '');
+            return;
+        }
+        var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        var options = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+            ? { mimeType: 'audio/webm;codecs=opus' }
+            : {};
+        mediaRecorder = new MediaRecorder(stream, options);
+        mediaRecorder.ondataavailable = function (e) {
+            if (e.data.size > 0) audioChunks.push(e.data);
+        };
+        mediaRecorder.onstop = function () {
+            stream.getTracks().forEach(function (t) { t.stop(); });
+            var blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+            uploadAudio(blob).catch(function (err) {
+                setStatus(err.message || 'Analysis failed.', '');
+            });
+        };
+        mediaRecorder.start(300);
+        recordStartedAt = Date.now();
+        isRecording = true;
+        micBtn.classList.add('is-recording');
+        stopBtn.hidden = false;
+        setStatus('Recording… tap Stop when done', 'is-recording');
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && isRecording) {
+            if (Date.now() - recordStartedAt < 1200) {
+                setStatus('Keep recording… speak for at least 2 seconds', 'is-recording');
+                return;
+            }
+            mediaRecorder.stop();
+            isRecording = false;
+            micBtn.classList.remove('is-recording');
+            stopBtn.hidden = true;
+        }
+    }
+
+    micBtn.addEventListener('click', function () {
+        if (isRecording) {
+            stopRecording();
+            return;
+        }
+        startRecording().catch(function () {
+            setStatus('Microphone permission denied.', '');
+        });
+    });
+
+    stopBtn.addEventListener('click', stopRecording);
+    cancelBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+
+    saveBtn.addEventListener('click', async function () {
+        errorEl.hidden = true;
+        saveBtn.disabled = true;
+        var payload = {
+            type: document.getElementById('voice-type').value,
+            amount: parseFloat(document.getElementById('voice-amount').value),
+            category: document.getElementById('voice-category').value,
+            date: document.getElementById('voice-date').value,
+            description: document.getElementById('voice-description').value
+        };
+        try {
+            var res = await fetch('{% url "voice_transaction_save_api" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(payload),
+                credentials: 'same-origin'
+            });
+            var data = await res.json();
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Save failed.');
+            }
+            window.location.reload();
+        } catch (err) {
+            errorEl.textContent = err.message;
+            errorEl.hidden = false;
+            saveBtn.disabled = false;
+        }
+    });
+})();
 </script>
 {% endblock %}
 

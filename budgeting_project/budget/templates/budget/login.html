@@ -1,58 +1,42 @@
-{% extends 'budget/base.html' %}
-{% block title %}Login – BudgetApp{% endblock %}
+{% extends 'budget/auth_base.html' %}
+{% block title %}Log In – SmartFinance{% endblock %}
 
-{% block content %}
+{% block auth_tagline %}Welcome back — pick up where you left off with budgets, transactions, and savings goals.{% endblock %}
+{% block auth_heading %}Welcome back{% endblock %}
+{% block auth_subtitle %}Log in to manage your spending, income, and financial goals.{% endblock %}
 
+{% block auth_content %}
+<form method="POST" action="{% url 'login' %}" class="auth-form">
+    {% csrf_token %}
 
-<div class="narrow">
-
-    <div style="text-align:center; margin-bottom:28px;">
-        <h2>Welcome Back</h2>
-        <p class="text-muted">Log in to your account to continue</p>
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Your username"
+            autocomplete="username"
+            required
+        >
     </div>
 
-    <div class="card">
-        <div class="card-header">Log In</div>
-        <div class="card-body">
-
-            <form method="POST" action="{% url 'login' %}">
-                {% csrf_token %}
-
-                
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        class="form-control"
-                        placeholder="Your username"
-                    >
-                </div>
-
-                
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-control"
-                        placeholder="Your password"
-                    >
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block">
-                    Log In
-                </button>
-            </form>
-
-        </div>
-        <div class="card-footer">
-            Don't have an account?
-            <a href="{% url 'signup' %}" style="color:#67e8f9; font-weight:600;">Create one here</a>
-        </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Your password"
+            autocomplete="current-password"
+            required
+        >
     </div>
 
-</div>
+    <button type="submit" class="auth-submit">Log in</button>
+</form>
+{% endblock %}
+
+{% block auth_footer %}
+    Don't have an account? <a href="{% url 'signup' %}">Create one</a>
 {% endblock %}

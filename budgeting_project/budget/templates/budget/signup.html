@@ -1,107 +1,82 @@
-{% extends 'budget/base.html' %}
-{% block title %}Sign Up – BudgetApp{% endblock %}
+{% extends 'budget/auth_base.html' %}
+{% block title %}Sign Up – SmartFinance{% endblock %}
 
-{% block content %}
+{% block auth_heading %}Create your account{% endblock %}
+{% block auth_subtitle %}Start tracking spending, income, and goals in one place.{% endblock %}
 
+{% block auth_content %}
+<form method="POST" action="{% url 'signup' %}" class="auth-form">
+    {% csrf_token %}
 
-<div class="narrow">
-
-    <div style="text-align:center; margin-bottom:28px;">
-        <h2>Create Your Account</h2>
-        <p class="text-muted">User Story #1 – Sign up to start budgeting</p>
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Choose a username"
+            value="{{ old.username }}"
+            autocomplete="username"
+        >
+        {% if errors.username %}
+            <div class="form-error">{{ errors.username }}</div>
+        {% endif %}
     </div>
 
-    <div class="card">
-        <div class="card-header">Sign Up</div>
-        <div class="card-body">
-
-            
-            <form method="POST" action="{% url 'signup' %}">
-                {% csrf_token %}
-
-                
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        class="form-control"
-                        placeholder="Choose a username"
-                        value="{{ old.username }}"
-                    >
-                    {% if errors.username %}
-                        <div class="form-error">{{ errors.username }}</div>
-                    {% endif %}
-                </div>
-
-                
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        class="form-control"
-                        placeholder="your@email.com"
-                        value="{{ old.email }}"
-                    >
-                    {% if errors.email %}
-                        <div class="form-error">{{ errors.email }}</div>
-                    {% endif %}
-                </div>
-
-                
-                <div class="form-group">
-                    <label for="password1">Password</label>
-                    <input
-                        type="password"
-                        id="password1"
-                        name="password1"
-                        class="form-control"
-                        placeholder="Enter a password"
-                    >
-                    {% if errors.password1 %}
-                        <div class="form-error">{{ errors.password1 }}</div>
-                    {% endif %}
-                </div>
-
-                
-                <div class="form-group">
-                    <label for="password2">Confirm Password</label>
-                    <input
-                        type="password"
-                        id="password2"
-                        name="password2"
-                        class="form-control"
-                        placeholder="Repeat the password"
-                    >
-                    {% if errors.password2 %}
-                        <div class="form-error">{{ errors.password2 }}</div>
-                    {% endif %}
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block">
-                    Create Account
-                </button>
-            </form>
-
-        </div>
-        <div class="card-footer">
-            Already have an account?
-            <a href="{% url 'login' %}" style="color:#67e8f9; font-weight:600;">Log in here</a>
-        </div>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="you@example.com"
+            value="{{ old.email }}"
+            autocomplete="email"
+        >
+        {% if errors.email %}
+            <div class="form-error">{{ errors.email }}</div>
+        {% endif %}
     </div>
 
-    
-    <div class="info-box">
-        <strong>User Story #1:</strong> As a new user, I want to create an account
-        with my name, email, and password so I can start using the budgeting app.<br>
-        <span class="text-muted">
-            Acceptance: All fields validated. Password hashed by Django.
-            On success, redirected to dashboard.
-        </span>
+    <div class="form-group">
+        <label for="password1">Password</label>
+        <input
+            type="password"
+            id="password1"
+            name="password1"
+            placeholder="Create a password"
+            autocomplete="new-password"
+        >
+        {% if errors.password1 %}
+            <div class="form-error">{{ errors.password1 }}</div>
+        {% endif %}
     </div>
 
-</div>
+    <ul class="auth-hints">
+        <li>Your password can't be too similar to your other personal information.</li>
+        <li>Your password must contain at least 8 characters.</li>
+        <li>Your password can't be a commonly used password.</li>
+        <li>Your password can't be entirely numeric.</li>
+    </ul>
+
+    <div class="form-group">
+        <label for="password2">Password confirmation</label>
+        <input
+            type="password"
+            id="password2"
+            name="password2"
+            placeholder="Confirm password"
+            autocomplete="new-password"
+        >
+        {% if errors.password2 %}
+            <div class="form-error">{{ errors.password2 }}</div>
+        {% endif %}
+    </div>
+
+    <button type="submit" class="auth-submit">Create account</button>
+</form>
+{% endblock %}
+
+{% block auth_footer %}
+    Already have an account? <a href="{% url 'login' %}">Log in</a>
 {% endblock %}

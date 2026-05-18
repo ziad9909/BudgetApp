@@ -1,6 +1,33 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from decimal import Decimal
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    display_name = models.CharField(max_length=120, blank=True)
+    phone = models.CharField(max_length=30, blank=True)
+    bio = models.CharField(max_length=280, blank=True)
+    preferred_currency = models.CharField(max_length=10, default='EGP')
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+
+    def get_display_name(self):
+        return self.display_name.strip() or self.user.get_full_name() or self.user.username
+
+    def __str__(self):
+        return f"Profile: {self.get_display_name()}"
+
+    class Meta:
+        verbose_name = 'User profile'
+        verbose_name_plural = 'User profiles'
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
 
 
                                                  
@@ -110,12 +137,17 @@ class Subscription(models.Model):
 
     user        = models.ForeignKey(User, on_delete=models.CASCADE)
     name        = models.CharField(max_length=200)
+    service_key = models.CharField(max_length=50, blank=True, default='')
     amount      = models.DecimalField(max_digits=10, decimal_places=2)
     billing_day = models.IntegerField(default=1)                               
     category    = models.CharField(max_length=100, default='Subscription')
     is_active   = models.BooleanField(default=True)
     last_paid   = models.DateField(null=True, blank=True)
     created_at  = models.DateTimeField(auto_now_add=True)
+
+    def get_brand(self):
+        from .data.subscription_services import resolve_subscription_brand
+        return resolve_subscription_brand(self.service_key, self.name)
 
     def is_due(self):
         """True if never paid this month or last paid in a previous month."""

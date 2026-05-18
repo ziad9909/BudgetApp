@@ -22,10 +22,9 @@
 
                 <div class="form-row">
 
-                    
                     <div class="form-group neo-select-wrap">
                         <label id="txn-type-label" for="transaction_type-trigger">Type</label>
-                        <div class="neo-select" data-neo-select>
+                        <div class="neo-select" data-neo-select id="transaction-type-select">
                             <input type="hidden" name="transaction_type" id="transaction_type" value="{% if old.transaction_type == 'income' %}income{% else %}expense{% endif %}">
                             <button type="button" class="neo-select-trigger" id="transaction_type-trigger"
                                     aria-haspopup="listbox" aria-expanded="false"
@@ -47,7 +46,6 @@
                         {% endif %}
                     </div>
 
-                    
                     <div class="form-group">
                         <label for="amount">Amount (EGP)</label>
                         <input
@@ -69,23 +67,6 @@
 
                 <div class="form-row">
 
-                    
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <input
-                            type="text"
-                            id="category"
-                            name="category"
-                            class="form-control"
-                            placeholder="e.g. Food, Transport"
-                            value="{{ old.category }}"
-                        >
-                        {% if errors.category %}
-                            <div class="form-error">{{ errors.category }}</div>
-                        {% endif %}
-                    </div>
-
-                    
                     <div class="form-group">
                         <label for="date">Date</label>
                         <input
@@ -100,33 +81,73 @@
                         {% endif %}
                     </div>
 
+                    <div class="form-group neo-select-wrap">
+                        <label id="pay-method-label" for="payment_method-trigger">Payment Method</label>
+                        <div class="neo-select" data-neo-select>
+                            <input type="hidden" name="payment_method" id="payment_method" value="{% if old.payment_method == 'card' %}card{% elif old.payment_method == 'online' %}online{% else %}cash{% endif %}">
+                            <button type="button" class="neo-select-trigger" id="payment_method-trigger"
+                                    aria-haspopup="listbox" aria-expanded="false"
+                                    aria-labelledby="pay-method-label payment_method-trigger">
+                                <span class="neo-select-label">{% if old.payment_method == 'card' %}Card{% elif old.payment_method == 'online' %}Online{% else %}Cash{% endif %}</span>
+                                <svg class="neo-select-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <ul class="neo-select-panel" role="listbox" tabindex="-1" hidden>
+                                <li role="option" tabindex="-1" data-value="cash" class="neo-select-option"
+                                    aria-selected="{% if old.payment_method != 'card' and old.payment_method != 'online' %}true{% else %}false{% endif %}">Cash</li>
+                                <li role="option" tabindex="-1" data-value="card" class="neo-select-option"
+                                    aria-selected="{% if old.payment_method == 'card' %}true{% else %}false{% endif %}">Card</li>
+                                <li role="option" tabindex="-1" data-value="online" class="neo-select-option"
+                                    aria-selected="{% if old.payment_method == 'online' %}true{% else %}false{% endif %}">Online</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
 
-                
-                <div class="form-group neo-select-wrap">
-                    <label id="pay-method-label" for="payment_method-trigger">Payment Method</label>
-                    <div class="neo-select" data-neo-select>
-                        <input type="hidden" name="payment_method" id="payment_method" value="{% if old.payment_method == 'card' %}card{% elif old.payment_method == 'online' %}online{% else %}cash{% endif %}">
-                        <button type="button" class="neo-select-trigger" id="payment_method-trigger"
+                <div class="form-group neo-select-wrap neo-select-wrap--category">
+                    <label id="category-label" for="category-trigger">Category</label>
+                    <div class="neo-select" data-neo-select id="category-select">
+                        <input type="hidden" name="category" id="category" value="{{ old.category }}">
+                        <button type="button" class="neo-select-trigger" id="category-trigger"
                                 aria-haspopup="listbox" aria-expanded="false"
-                                aria-labelledby="pay-method-label payment_method-trigger">
-                            <span class="neo-select-label">{% if old.payment_method == 'card' %}Card{% elif old.payment_method == 'online' %}Online{% else %}Cash{% endif %}</span>
+                                aria-labelledby="category-label category-trigger">
+                            <span class="neo-select-label" id="category-label-text">
+                                {% if old.category %}{{ old.category }}{% else %}Select category{% endif %}
+                            </span>
                             <svg class="neo-select-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                 <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
-                        <ul class="neo-select-panel" role="listbox" tabindex="-1" hidden>
-                            <li role="option" tabindex="-1" data-value="cash" class="neo-select-option"
-                                aria-selected="{% if old.payment_method != 'card' and old.payment_method != 'online' %}true{% else %}false{% endif %}">Cash</li>
-                            <li role="option" tabindex="-1" data-value="card" class="neo-select-option"
-                                aria-selected="{% if old.payment_method == 'card' %}true{% else %}false{% endif %}">Card</li>
-                            <li role="option" tabindex="-1" data-value="online" class="neo-select-option"
-                                aria-selected="{% if old.payment_method == 'online' %}true{% else %}false{% endif %}">Online</li>
+                        <ul class="neo-select-panel" role="listbox" tabindex="-1" hidden id="category-options">
+                            {% for cat in expense_categories %}
+                            <li role="option" tabindex="-1"
+                                data-value="{{ cat.name }}"
+                                data-cat-type="expense"
+                                class="neo-select-option category-option"
+                                aria-selected="{% if old.category == cat.name %}true{% else %}false{% endif %}">
+                                <span class="category-option-dot" style="background: {{ cat.color }};"></span>
+                                {{ cat.name }}
+                            </li>
+                            {% endfor %}
+                            {% for cat in income_categories %}
+                            <li role="option" tabindex="-1"
+                                data-value="{{ cat.name }}"
+                                data-cat-type="income"
+                                class="neo-select-option category-option"
+                                aria-selected="{% if old.category == cat.name %}true{% else %}false{% endif %}">
+                                <span class="category-option-dot" style="background: {{ cat.color }};"></span>
+                                {{ cat.name }}
+                            </li>
+                            {% endfor %}
                         </ul>
                     </div>
+                    {% if errors.category %}
+                        <div class="form-error">{{ errors.category }}</div>
+                    {% endif %}
                 </div>
 
-                
                 <div class="form-group">
                     <label for="notes">Notes (optional)</label>
                     <textarea
@@ -156,4 +177,53 @@
         </span>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var typeInput = document.getElementById('transaction_type');
+    var categoryInput = document.getElementById('category');
+    var categoryLabel = document.getElementById('category-label-text');
+    var categoryOptions = document.querySelectorAll('#category-options .category-option');
+
+    function currentType() {
+        return typeInput && typeInput.value === 'income' ? 'income' : 'expense';
+    }
+
+    function filterCategoryOptions() {
+        var t = currentType();
+        var selected = categoryInput ? categoryInput.value : '';
+        var selectedVisible = false;
+
+        categoryOptions.forEach(function (opt) {
+            var match = opt.getAttribute('data-cat-type') === t;
+            opt.hidden = !match;
+            opt.style.display = match ? '' : 'none';
+            if (match && opt.getAttribute('data-value') === selected) {
+                selectedVisible = true;
+            }
+        });
+
+        if (!selectedVisible && categoryInput) {
+            categoryInput.value = '';
+            if (categoryLabel) categoryLabel.textContent = 'Select category';
+            categoryOptions.forEach(function (opt) {
+                opt.setAttribute('aria-selected', 'false');
+            });
+        }
+    }
+
+    filterCategoryOptions();
+
+    var typeSelect = document.getElementById('transaction-type-select');
+    if (typeSelect) {
+        typeSelect.querySelectorAll('.neo-select-option').forEach(function (opt) {
+            opt.addEventListener('click', function () {
+                setTimeout(filterCategoryOptions, 0);
+            });
+        });
+    }
+})();
+</script>
 {% endblock %}

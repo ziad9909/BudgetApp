@@ -23,7 +23,7 @@
     </div>
     {% endif %}
 
-    <div class="card">
+    <div class="card card--overflow-visible">
         <div class="card-header">Budget Details</div>
         <div class="card-body">
 
@@ -36,16 +36,36 @@
                 {% csrf_token %}
 
                 
-                <div class="form-group">
-                    <label for="category">Category</label>
-                    <input
-                        type="text"
-                        id="category"
-                        name="category"
-                        class="form-control"
-                        placeholder="e.g. Food, Transport, Bills"
-                        value="{% if action == 'Edit' %}{{ budget.category }}{% else %}{{ old.category }}{% endif %}"
-                    >
+                <div class="form-group neo-select-wrap neo-select-wrap--category">
+                    <label id="budget-category-label" for="category-trigger">Category</label>
+                    <div class="neo-select" data-neo-select id="budget-category-select">
+                        <input type="hidden" name="category" id="category"
+                               value="{% if old.category %}{{ old.category }}{% elif action == 'Edit' %}{{ budget.category }}{% endif %}">
+                        <button type="button" class="neo-select-trigger" id="category-trigger"
+                                aria-haspopup="listbox" aria-expanded="false"
+                                aria-labelledby="budget-category-label category-trigger">
+                            <span class="neo-select-label" id="category-label-text">
+                                {% if old.category %}{{ old.category }}
+                                {% elif action == 'Edit' %}{{ budget.category }}
+                                {% else %}Select category{% endif %}
+                            </span>
+                            <svg class="neo-select-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <ul class="neo-select-panel" role="listbox" tabindex="-1" hidden>
+                            {% for cat in expense_categories %}
+                            <li role="option" tabindex="-1"
+                                data-value="{{ cat.name }}"
+                                class="neo-select-option category-option"
+                                aria-selected="{% if old.category == cat.name %}true{% elif action == 'Edit' and budget.category == cat.name %}true{% else %}false{% endif %}">
+                                <span class="category-option-dot" style="background: {{ cat.color }};"></span>
+                                {{ cat.name }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="form-hint">Choose an expense category to track spending limits.</div>
                     {% if errors.category %}
                         <div class="form-error">{{ errors.category }}</div>
                     {% endif %}

@@ -1,163 +1,476 @@
 {% extends 'budget/base.html' %}
-{% block title %}Subscriptions – BudgetApp{% endblock %}
+{% block title %}Subscriptions – SmartFinance{% endblock %}
 
 {% block content %}
 
 <div class="page-header">
     <div>
         <h2>Subscriptions</h2>
-        <p>Your monthly recurring payments</p>
+        <p>Track and pay your monthly recurring services</p>
     </div>
 </div>
 
-<div class="sub-layout">
+<div class="sub-page">
 
-    
-    <div>
-        <div class="card card--overflow-visible">
-            <div class="card-header">+ New Subscription</div>
-            <div class="card-body">
-                <form method="POST" action="{% url 'subscriptions' %}">
-                    {% csrf_token %}
-
-                    <div class="form-group">
-                        <label for="name">Service Name</label>
-                        <input type="text" id="name" name="name" class="form-control"
-                               placeholder="e.g. Netflix, Spotify" value="{{ old.name }}">
-                        {% if errors.name %}<div class="form-error">{{ errors.name }}</div>{% endif %}
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="amount">Monthly Amount (EGP)</label>
-                            <input type="number" id="amount" name="amount" class="form-control"
-                                   placeholder="0.00" step="0.01" min="0.01" value="{{ old.amount }}">
-                            {% if errors.amount %}<div class="form-error">{{ errors.amount }}</div>{% endif %}
-                        </div>
-                        <div class="form-group">
-                            <label for="billing_day">Billing Day (1–28)</label>
-                            <input type="number" id="billing_day" name="billing_day" class="form-control"
-                                   placeholder="1" min="1" max="28"
-                                   value="{{ old.billing_day|default:'1' }}">
-                            {% if errors.billing_day %}<div class="form-error">{{ errors.billing_day }}</div>{% endif %}
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <input type="text" id="category" name="category" class="form-control"
-                               placeholder="e.g. Entertainment, Software"
-                               value="{{ old.category|default:'Subscription' }}">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-block">Add Subscription</button>
-                </form>
-            </div>
+    <div class="sub-stats">
+        <div class="sub-stat-card">
+            <span class="sub-stat-card__label">Active subscriptions</span>
+            <span class="sub-stat-card__value">{{ sub_stats.count }}</span>
         </div>
-
-        <div class="info-box">
-            <strong>Subscriptions:</strong> Press <strong>Pay</strong> on any card to instantly record
-            an expense transaction and deduct it from your balance.
+        <div class="sub-stat-card sub-stat-card--accent">
+            <span class="sub-stat-card__label">Monthly total</span>
+            <span class="sub-stat-card__value">{{ sub_stats.total_monthly|floatformat:2 }} <small>EGP</small></span>
+        </div>
+        <div class="sub-stat-card{% if sub_stats.due_count %} sub-stat-card--warn{% endif %}">
+            <span class="sub-stat-card__label">Due this month</span>
+            <span class="sub-stat-card__value">{{ sub_stats.due_count }}</span>
         </div>
     </div>
 
-    
-    <div>
-        {% if subscriptions %}
-            <div class="sub-grid">
-            {% for s in subscriptions %}
-                <div class="sub-card {% if s.is_due %}sub-card--due{% else %}sub-card--paid{% endif %}">
+    <div class="card card--overflow-visible sub-add-card">
+        <div class="card-header">Add a subscription</div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'subscriptions' %}" id="sub-form">
+                {% csrf_token %}
+                <input type="hidden" name="service_key" id="service_key" value="{{ old.service_key }}">
 
-                    
-                    <div class="sub-card__head">
-                        <div class="sub-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <div class="sub-add-layout">
+                    <div class="sub-add-picker">
+                        <p class="sub-step-label">Step 1 — Pick a service</p>
+                        <div class="sub-search-wrap">
+                            <svg class="sub-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                             </svg>
+                            <input type="search" id="sub-brand-search" class="form-control sub-search-input"
+                                   placeholder="Search Netflix, Spotify, Shahid…" autocomplete="off">
                         </div>
-                        <div class="sub-card__title">{{ s.name }}</div>
-                        {% if s.is_due %}
-                            <span class="sub-badge sub-badge--due">Due</span>
-                        {% else %}
-                            <span class="sub-badge sub-badge--paid">Paid</span>
-                        {% endif %}
+
+                        <div class="sub-brand-catalog" id="sub-brand-catalog">
+                            {% for group in service_groups %}
+                            <section class="sub-brand-section" data-group="{{ group.id }}">
+                                <h4 class="sub-brand-section__title">{{ group.label }}</h4>
+                                <div class="sub-brand-row">
+                                    {% for svc in group.services %}
+                                    <button type="button"
+                                            class="sub-brand-pick{% if old.service_key == svc.id %} is-selected{% endif %}"
+                                            data-service-id="{{ svc.id }}"
+                                            data-service-name="{{ svc.name }}"
+                                            data-service-category="{{ svc.category }}"
+                                            data-service-color="{{ svc.color }}"
+                                            data-service-icon="{{ svc.icon_slug }}"
+                                            title="{{ svc.name }}">
+                                        <span class="sub-brand-pick__icon" style="background: {{ svc.color }};">
+                                            {% if svc.icon_slug %}
+                                            <img src="https://cdn.simpleicons.org/{{ svc.icon_slug }}/white" alt="" loading="lazy">
+                                            {% else %}
+                                            <span class="sub-brand-pick__letter">{{ svc.name|slice:":1" }}</span>
+                                            {% endif %}
+                                        </span>
+                                        <span class="sub-brand-pick__name">{{ svc.name }}</span>
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </section>
+                            {% endfor %}
+                            <p class="sub-brand-empty" id="sub-brand-empty" hidden>No services match your search.</p>
+                        </div>
                     </div>
 
-                    
-                    <div class="sub-card__amount">{{ s.amount|floatformat:2 }} <span>EGP / month</span></div>
+                    <div class="sub-add-details">
+                        <p class="sub-step-label">Step 2 — Payment details</p>
 
-                    
-                    <div class="sub-card__meta">
-                        <span>Billing day: <strong>{{ s.billing_day }}</strong></span>
-                        <span>Category: <strong>{{ s.category }}</strong></span>
-                    </div>
-                    {% if s.last_paid %}
-                    <div class="sub-card__last-paid">Last paid: {{ s.last_paid }}</div>
-                    {% endif %}
+                        <div class="sub-selected-preview" id="sub-selected-preview" hidden>
+                            <span class="sub-selected-preview__icon" id="preview-icon"></span>
+                            <div class="sub-selected-preview__text">
+                                <strong id="preview-name">—</strong>
+                                <span>Selected service</span>
+                            </div>
+                            <button type="button" class="sub-selected-preview__clear" id="sub-clear-pick">Change</button>
+                        </div>
 
-                    
-                    <div class="sub-card__actions">
-                        {% if s.is_due %}
-                        <form method="POST" action="{% url 'pay_subscription' s.id %}" style="flex:1;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-primary btn-block sub-pay-btn">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <polyline points="20 6 9 17 4 12"/>
-                                </svg>
-                                Pay now
-                            </button>
-                        </form>
-                        {% else %}
-                        <form method="POST" action="{% url 'pay_subscription' s.id %}" style="flex:1;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline btn-block">
-                                Pay again
-                            </button>
-                        </form>
-                        {% endif %}
-                        <form method="POST" action="{% url 'delete_subscription' s.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn sub-del-btn" title="Remove subscription"
-                                    onclick="return confirm('Remove {{ s.name }}?')">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                                    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
-                                    <path d="M10 11v6"/><path d="M14 11v6"/>
-                                    <path d="M9 6V4h6v2"/>
-                                </svg>
-                            </button>
-                        </form>
+                        <div class="form-group">
+                            <label for="name">Service name</label>
+                            <input type="text" id="name" name="name" class="form-control"
+                                   placeholder="Pick above or type custom name" value="{{ old.name }}">
+                            {% if errors.name %}<div class="form-error">{{ errors.name }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="amount">Monthly amount (EGP)</label>
+                                <input type="number" id="amount" name="amount" class="form-control"
+                                       placeholder="0.00" step="0.01" min="0.01" value="{{ old.amount }}">
+                                {% if errors.amount %}<div class="form-error">{{ errors.amount }}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="billing_day">Billing day</label>
+                                <input type="number" id="billing_day" name="billing_day" class="form-control"
+                                       placeholder="1" min="1" max="28"
+                                       value="{{ old.billing_day|default:'1' }}">
+                                {% if errors.billing_day %}<div class="form-error">{{ errors.billing_day }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <input type="text" id="category" name="category" class="form-control"
+                                   value="{{ old.category|default:'Subscriptions' }}">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Add subscription</button>
+                        <p class="sub-form-hint">Press <strong>Pay</strong> on any card below to record the expense instantly.</p>
                     </div>
                 </div>
-            {% endfor %}
-            </div>
-
-        {% else %}
-            <div class="empty-state" style="margin-top:40px;">
-                <div style="font-size:2.4rem; margin-bottom:12px;">📋</div>
-                <h3>No subscriptions yet</h3>
-                <p>Add your first monthly subscription on the left.</p>
-            </div>
-        {% endif %}
+            </form>
+        </div>
     </div>
+
+    <section class="sub-list-section">
+        <div class="sub-list-header">
+            <h3>Your subscriptions</h3>
+            {% if subscriptions %}
+            <span class="sub-list-count">{{ subscriptions|length }} active</span>
+            {% endif %}
+        </div>
+
+        {% if subscriptions %}
+        <div class="sub-grid">
+            {% for s in subscriptions %}
+            <article class="sub-card {% if s.is_due %}sub-card--due{% else %}sub-card--paid{% endif %}">
+                <div class="sub-card__head">
+                    {% with brand=s.get_brand %}
+                    <div class="sub-icon" style="{% if brand %}background: {{ brand.color }}; border-color: transparent;{% endif %}">
+                        {% if brand and brand.icon_slug %}
+                        <img src="https://cdn.simpleicons.org/{{ brand.icon_slug }}/white" alt="{{ s.name }}" loading="lazy">
+                        {% else %}
+                        <span class="sub-icon__letter">{{ s.name|slice:":1" }}</span>
+                        {% endif %}
+                    </div>
+                    {% endwith %}
+                    <div class="sub-card__title-wrap">
+                        <div class="sub-card__title">{{ s.name }}</div>
+                        <div class="sub-card__category">{{ s.category }}</div>
+                    </div>
+                    {% if s.is_due %}
+                    <span class="sub-badge sub-badge--due">Due</span>
+                    {% else %}
+                    <span class="sub-badge sub-badge--paid">Paid</span>
+                    {% endif %}
+                </div>
+
+                <div class="sub-card__amount">{{ s.amount|floatformat:2 }} <span>EGP / month</span></div>
+
+                <div class="sub-card__meta">
+                    <span>Billing day <strong>{{ s.billing_day }}</strong></span>
+                    {% if s.last_paid %}
+                    <span>Last paid <strong>{{ s.last_paid }}</strong></span>
+                    {% endif %}
+                </div>
+
+                <div class="sub-card__actions">
+                    <form method="POST" action="{% url 'pay_subscription' s.id %}" style="flex:1;">
+                        {% csrf_token %}
+                        {% if s.is_due %}
+                        <button type="submit" class="btn btn-primary btn-block sub-pay-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            Pay now
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-outline btn-block">Pay again</button>
+                        {% endif %}
+                    </form>
+                    <form method="POST" action="{% url 'delete_subscription' s.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn sub-del-btn" title="Remove"
+                                onclick="return confirm('Remove {{ s.name }}?')">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+                                <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state empty-state--compact">
+            <span class="empty-state-mark" aria-hidden="true"></span>
+            <h3>No subscriptions yet</h3>
+            <p>Choose a service above and add your first monthly payment.</p>
+        </div>
+        {% endif %}
+    </section>
 
 </div>
 
-
 <style>
-.sub-layout {
-    display: grid;
-    grid-template-columns: 340px 1fr;
+.sub-page {
+    display: flex;
+    flex-direction: column;
     gap: 28px;
+}
+
+/* ── Stats ── */
+.sub-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+.sub-stat-card {
+    background: radial-gradient(130% 120% at 10% 0%, #1a2446 0%, #121a34 50%, #0f162b 100%);
+    border: 1px solid rgba(136, 165, 255, 0.12);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.sub-stat-card--accent {
+    border-color: rgba(139, 92, 246, 0.28);
+    background: radial-gradient(130% 120% at 10% 0%, #2a1f4e 0%, #121a34 50%, #0f162b 100%);
+}
+.sub-stat-card--warn {
+    border-color: rgba(251, 191, 36, 0.35);
+}
+.sub-stat-card__label {
+    font-size: 0.76rem;
+    color: #8f9bc4;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.sub-stat-card__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #e6ecff;
+    line-height: 1.1;
+}
+.sub-stat-card__value small {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #8f9bc4;
+}
+
+/* ── Add form layout ── */
+.sub-add-card .card-body { padding: 24px 28px; }
+.sub-add-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: 0;
     align-items: start;
+}
+.sub-add-picker {
+    padding-right: 28px;
+    border-right: 1px solid rgba(136, 165, 255, 0.12);
+    min-width: 0;
+}
+.sub-add-details {
+    padding-left: 28px;
+    position: sticky;
+    top: 24px;
+}
+.sub-step-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #a78bfa;
+    margin: 0 0 14px;
+}
+
+.sub-search-wrap {
+    position: relative;
+    margin-bottom: 18px;
+}
+.sub-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6f7da8;
+    pointer-events: none;
+}
+.sub-search-input {
+    padding-left: 38px !important;
+}
+
+.sub-brand-catalog {
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.4) transparent;
+}
+.sub-brand-section {
+    margin-bottom: 20px;
+}
+.sub-brand-section:last-child { margin-bottom: 0; }
+.sub-brand-section__title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6f7da8;
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(136, 165, 255, 0.08);
+}
+.sub-brand-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.sub-brand-pick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: 82px;
+    padding: 8px 4px;
+    border-radius: 12px;
+    border: 1px solid rgba(139, 92, 246, 0.18);
+    background: rgba(15, 23, 42, 0.65);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s, background 0.15s;
+    font-family: inherit;
+    color: #c7d2fe;
+}
+.sub-brand-pick:hover {
+    border-color: rgba(167, 139, 250, 0.45);
+    background: rgba(30, 27, 75, 0.5);
+    transform: translateY(-1px);
+}
+.sub-brand-pick.is-selected {
+    border-color: #a78bfa;
+    background: rgba(139, 92, 246, 0.15);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+}
+.sub-brand-pick__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.sub-brand-pick__icon img { width: 24px; height: 24px; object-fit: contain; }
+.sub-brand-pick__letter {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+}
+.sub-brand-pick__name {
+    font-size: 0.62rem;
+    line-height: 1.25;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+}
+.sub-brand-empty {
+    text-align: center;
+    color: #6f7da8;
+    font-size: 0.88rem;
+    padding: 24px 12px;
+    margin: 0;
+}
+
+.sub-selected-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+}
+.sub-selected-preview__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 700;
+    color: #fff;
+    font-size: 1.1rem;
+}
+.sub-selected-preview__icon img { width: 26px; height: 26px; }
+.sub-selected-preview__text {
+    flex: 1;
+    min-width: 0;
+}
+.sub-selected-preview__text strong {
+    display: block;
+    color: #e6ecff;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sub-selected-preview__text span {
+    font-size: 0.75rem;
+    color: #8f9bc4;
+}
+.sub-selected-preview__clear {
+    background: none;
+    border: none;
+    color: #a78bfa;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-family: inherit;
+    flex-shrink: 0;
+}
+.sub-selected-preview__clear:hover { color: #c4b5fd; }
+
+.sub-form-hint {
+    margin: 12px 0 0;
+    font-size: 0.76rem;
+    color: #6f7da8;
+    text-align: center;
+    line-height: 1.45;
+}
+
+/* ── List section ── */
+.sub-list-section { margin-top: 4px; }
+.sub-list-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+.sub-list-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: #e6ecff;
+}
+.sub-list-count {
+    font-size: 0.8rem;
+    color: #8f9bc4;
+    background: rgba(139, 92, 246, 0.12);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(139, 92, 246, 0.25);
 }
 
 .sub-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 18px;
 }
 
-/* ── Subscription card ── */
 .sub-card {
     background: radial-gradient(130% 120% at 10% 0%, #1a2446 0%, #121a34 46%, #0f162b 100%);
     border-radius: 16px;
@@ -166,76 +479,101 @@
     box-shadow: 0 8px 24px rgba(3, 8, 20, 0.45);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    transition: transform 0.25s cubic-bezier(0.34,1.2,0.64,1), box-shadow 0.25s ease;
+    gap: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .sub-card:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 14px 34px rgba(3, 8, 20, 0.55), 0 0 0 1px rgba(167,139,250,0.18);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(3, 8, 20, 0.5);
 }
 .sub-card--due  { border-color: rgba(167, 139, 250, 0.32); }
 .sub-card--paid { border-color: rgba(20, 184, 166, 0.25); }
 
-/* head */
 .sub-card__head {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    align-items: flex-start;
+    gap: 12px;
 }
 .sub-icon {
-    width: 36px; height: 36px;
+    width: 44px;
+    height: 44px;
     background: linear-gradient(145deg, #2a1f4e 0%, #1a2a46 100%);
     border: 1px solid rgba(139, 92, 246, 0.35);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
     color: #a78bfa;
 }
-.sub-icon svg { width: 18px; height: 18px; }
-
+.sub-icon img { width: 24px; height: 24px; object-fit: contain; }
+.sub-icon__letter {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+}
+.sub-card__title-wrap { flex: 1; min-width: 0; }
 .sub-card__title {
     font-weight: 700;
-    font-size: 0.97rem;
+    font-size: 1rem;
     color: #e6ecff;
-    flex: 1;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-
+.sub-card__category {
+    font-size: 0.74rem;
+    color: #6f7da8;
+    margin-top: 2px;
+}
 .sub-badge {
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;
-    text-transform: uppercase; padding: 3px 9px; border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
     flex-shrink: 0;
 }
 .sub-badge--due  { background: rgba(139,92,246,0.22); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.4); }
 .sub-badge--paid { background: rgba(20,184,166,0.18); color: #5eead4; border: 1px solid rgba(20,184,166,0.35); }
 
-/* amount */
 .sub-card__amount {
-    font-size: 1.5rem; font-weight: 700;
+    font-size: 1.6rem;
+    font-weight: 700;
     background: linear-gradient(145deg, #9d8bd4 0%, #78c2cd 100%);
-    -webkit-background-clip: text; background-clip: text;
-    color: transparent; -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
     line-height: 1;
 }
 .sub-card__amount span {
-    font-size: 0.78rem; font-weight: 500;
-    -webkit-text-fill-color: #8f9bc4; color: #8f9bc4;
+    font-size: 0.78rem;
+    font-weight: 500;
+    -webkit-text-fill-color: #8f9bc4;
+    color: #8f9bc4;
 }
-
-/* meta */
 .sub-card__meta {
-    display: flex; flex-wrap: wrap; gap: 8px 16px;
-    font-size: 0.78rem; color: #a8b3d6;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    font-size: 0.78rem;
+    color: #a8b3d6;
 }
 .sub-card__meta strong { color: #c7d2fe; }
-.sub-card__last-paid { font-size: 0.76rem; color: #6f7da8; }
 
-/* actions */
 .sub-card__actions {
-    display: flex; gap: 8px; margin-top: 4px; align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 4px;
+    align-items: center;
 }
 .sub-pay-btn {
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 6px;
 }
 .sub-del-btn {
@@ -252,9 +590,110 @@
     color: #ff9ec0;
 }
 
-@media (max-width: 860px) {
-    .sub-layout { grid-template-columns: 1fr; }
+@media (max-width: 960px) {
+    .sub-add-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    .sub-add-picker {
+        padding-right: 0;
+        border-right: none;
+        padding-bottom: 24px;
+        border-bottom: 1px solid rgba(136, 165, 255, 0.12);
+    }
+    .sub-add-details {
+        padding-left: 0;
+        position: static;
+    }
+    .sub-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .sub-brand-pick { width: calc(33.333% - 6px); }
+    .sub-grid { grid-template-columns: 1fr; }
 }
 </style>
 
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function () {
+    var grid = document.getElementById('sub-brand-catalog');
+    var keyInput = document.getElementById('service_key');
+    var nameInput = document.getElementById('name');
+    var catInput = document.getElementById('category');
+    var searchInput = document.getElementById('sub-brand-search');
+    var preview = document.getElementById('sub-selected-preview');
+    var previewIcon = document.getElementById('preview-icon');
+    var previewName = document.getElementById('preview-name');
+    var clearBtn = document.getElementById('sub-clear-pick');
+    var emptyMsg = document.getElementById('sub-brand-empty');
+
+    if (!grid || !keyInput) return;
+
+    function showPreview(btn) {
+        if (!preview || !previewIcon || !previewName) return;
+        var name = btn.getAttribute('data-service-name') || '';
+        var color = btn.getAttribute('data-service-color') || '#8b5cf6';
+        var icon = btn.getAttribute('data-service-icon') || '';
+        previewName.textContent = name;
+        previewIcon.style.background = color;
+        if (icon) {
+            previewIcon.innerHTML = '<img src="https://cdn.simpleicons.org/' + icon + '/white" alt="">';
+        } else {
+            previewIcon.innerHTML = '<span>' + (name.charAt(0) || '?') + '</span>';
+        }
+        preview.hidden = false;
+    }
+
+    function clearSelection() {
+        grid.querySelectorAll('.sub-brand-pick').forEach(function (b) { b.classList.remove('is-selected'); });
+        keyInput.value = '';
+        if (preview) preview.hidden = true;
+    }
+
+    grid.querySelectorAll('.sub-brand-pick').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            grid.querySelectorAll('.sub-brand-pick').forEach(function (b) { b.classList.remove('is-selected'); });
+            btn.classList.add('is-selected');
+            keyInput.value = btn.getAttribute('data-service-id') || '';
+            if (nameInput) nameInput.value = btn.getAttribute('data-service-name') || '';
+            if (catInput) catInput.value = btn.getAttribute('data-service-category') || 'Subscriptions';
+            showPreview(btn);
+        });
+    });
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            clearSelection();
+            if (nameInput) { nameInput.value = ''; nameInput.focus(); }
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            var q = searchInput.value.trim().toLowerCase();
+            var anyVisible = false;
+            grid.querySelectorAll('.sub-brand-section').forEach(function (section) {
+                var sectionVisible = false;
+                section.querySelectorAll('.sub-brand-pick').forEach(function (btn) {
+                    var match = !q || (btn.getAttribute('data-service-name') || '').toLowerCase().indexOf(q) !== -1;
+                    btn.hidden = !match;
+                    if (match) sectionVisible = true;
+                });
+                section.hidden = !sectionVisible;
+                if (sectionVisible) anyVisible = true;
+            });
+            if (emptyMsg) emptyMsg.hidden = anyVisible || !q;
+        });
+    }
+
+    var selected = grid.querySelector('.sub-brand-pick.is-selected');
+    if (selected) showPreview(selected);
+})();
+</script>
 {% endblock %}
